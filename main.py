@@ -2,38 +2,25 @@ import pygame
 import math
 import random
 
-# Setup display
+# Initialize Pygame and set up display
 pygame.init()
 WIDTH, HEIGHT = 800, 500
 win = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Hangman Game!")
 
-# Button variables
+# Constants
 RADIUS = 20
 GAP = 15
-letters = []
-startx = round((WIDTH - (RADIUS * 2 + GAP) * 13) / 2)
-starty = 400
-A = 65
-for i in range(26):
-    x = startx + GAP * 2 + ((RADIUS * 2 + GAP) * (i % 13))
-    y = starty + ((i // 13) * (GAP + RADIUS * 2))
-    letters.append([x, y, chr(A + i), True])
+FPS = 60
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
 
 # Fonts
 LETTER_FONT = pygame.font.SysFont('comicsans', 40)
 WORD_FONT = pygame.font.SysFont('comicsans', 60)
 TITLE_FONT = pygame.font.SysFont('comicsans', 70)
+HINT_FONT = pygame.font.SysFont('comicsans', 30)  # Smaller size
 
-# Load hangman images
-images = []
-for i in range(7):
-    try:
-        image = pygame.image.load(f"hangman{i}.png")
-    except:
-        print(f"Missing image: hangman{i}.png")
-        image = pygame.Surface((100, 100))  # placeholder
-    images.append(image)
 
 # Game variables
 hangman_status = 0
@@ -41,7 +28,34 @@ current_level = 1
 max_level = 5
 guessed = []
 
-# Words organized by difficulty level
+# Background image
+try:
+    background = pygame.image.load("background.jpg")
+    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+except:
+    background = pygame.Surface((WIDTH, HEIGHT))
+    background.fill(WHITE)
+
+# Hangman images
+images = []
+for i in range(7):
+    try:
+        image = pygame.image.load(f"hangman{i}.png")
+    except:
+        print(f"Missing image: hangman{i}.png")
+        image = pygame.Surface((100, 100))  # Placeholder
+    images.append(image)
+
+# Button positions for letters
+letters = []
+startx = round((WIDTH - (RADIUS * 2 + GAP) * 13) / 2)
+starty = 400
+for i in range(26):
+    x = startx + GAP * 2 + ((RADIUS * 2 + GAP) * (i % 13))
+    y = starty + ((i // 13) * (GAP + RADIUS * 2))
+    letters.append([x, y, chr(65 + i), True])
+
+# Words and hints
 level_words = {
     1: ["CAT", "DOG", "CAR", "TREE"],
     2: ["PYTHON", "ROCKET", "PLANET", "MOUSE"],
@@ -50,47 +64,58 @@ level_words = {
     5: ["INCONCEIVABLE", "MICROPROCESSOR", "EXTRAORDINARY"]
 }
 
-# Colors
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
+level_hints = {
+    "CAT": "A small pet animal.",
+    "DOG": "Man's best friend.",
+    "CAR": "A vehicle with four wheels.",
+    "TREE": "A tall plant with branches and leaves.",
+    "PYTHON": "A popular programming language.",
+    "ROCKET": "A vehicle used for space travel.",
+    "PLANET": "A large celestial body orbiting a star.",
+    "MOUSE": "A small rodent or a computer device.",
+    "ELEPHANT": "A large mammal with a trunk.",
+    "NOTEBOOK": "A type of portable computer.",
+    "PYRAMID": "A triangular-shaped structure, often seen in Egypt.",
+    "GIRAFFE": "A tall animal with a long neck.",
+    "ASTRONOMER": "A scientist who studies the stars.",
+    "BACKPACKING": "Traveling with a backpack, often hiking.",
+    "CONTROLLER": "A device used to control something, like a game console.",
+    "INCONCEIVABLE": "Something unimaginable or unbelievable.",
+    "MICROPROCESSOR": "The brain of a computer, which executes instructions.",
+    "EXTRAORDINARY": "Something very unusual or remarkable."
+}
 
-# Load background image (replace "background.jpg" with your actual image)
-background = pygame.image.load("background.jpg")
-background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-
-# Draw function
+# Draw everything
 def draw():
-    # Use the background image  win.blit(background, (0, 0)) 
+    #win.blit(background, (0, 0))
     win.fill(WHITE)
-    # Draw title with current level
-    text = TITLE_FONT.render(f"LEVEL {current_level} - HANGABUBU", 1, BLACK)
-    win.blit(text, (WIDTH / 2 - text.get_width() / 2, 20))
+    title = TITLE_FONT.render(f"LEVEL {current_level} - HANGABUBU", 1, BLACK)
+    win.blit(title, (WIDTH / 2 - title.get_width() / 2, 20))
 
-    # Draw word
+    # Display the current word
     display_word = ""
     for letter in word:
-        if letter == " ":
-            display_word += "  "
-        elif letter in guessed:
-            display_word += letter + " "
-        else:
-            display_word += "_ "
+        display_word += (letter + " ") if letter in guessed else ("  " if letter == " " else "_ ")
     text = WORD_FONT.render(display_word, 1, BLACK)
     win.blit(text, (WIDTH / 2 - text.get_width() / 2, 200))
 
     # Draw letter buttons
-    for letter in letters:
-        x, y, ltr, visible = letter
+    for x, y, ltr, visible in letters:
         if visible:
             pygame.draw.circle(win, BLACK, (x, y), RADIUS, 3)
-            text = LETTER_FONT.render(ltr, 1, BLACK)
-            win.blit(text, (x - text.get_width() / 2, y - text.get_height() / 2))
+            ltr_text = LETTER_FONT.render(ltr, 1, BLACK)
+            win.blit(ltr_text, (x - ltr_text.get_width() / 2, y - ltr_text.get_height() / 2))
 
-    # Draw hangman image
+    # Draw hangman
     win.blit(images[hangman_status], (150, 100))
+
+    # Draw hint
+    hint_text = HINT_FONT.render(f"Hint: {hint}", 1, BLACK)
+    win.blit(hint_text, (WIDTH / 2 - hint_text.get_width() / 2, HEIGHT / 2 + 100))
+
     pygame.display.update()
 
-# Message display
+# Show a message (win/lose)
 def display_message(message):
     pygame.time.delay(1000)
     win.fill(WHITE)
@@ -99,22 +124,56 @@ def display_message(message):
     pygame.display.update()
     pygame.time.delay(3000)
 
+# Draw menu screen
+def draw_menu():
+    win.fill(WHITE)
+    title = TITLE_FONT.render("HANGABUBU", 1, BLACK)
+    win.blit(title, (WIDTH / 2 - title.get_width() / 2, 100))
+
+    # Play button
+    play_rect = pygame.Rect(WIDTH / 2 - 100, 200, 200, 60)
+    pygame.draw.rect(win, (200, 200, 200), play_rect)
+    play_text = WORD_FONT.render("Play", 1, BLACK)
+    win.blit(play_text, (WIDTH / 2 - play_text.get_width() / 2, 210))
+
+    # Exit button
+    exit_rect = pygame.Rect(WIDTH / 2 - 100, 300, 200, 60)
+    pygame.draw.rect(win, (200, 200, 200), exit_rect)
+    exit_text = WORD_FONT.render("Exit", 1, BLACK)
+    win.blit(exit_text, (WIDTH / 2 - exit_text.get_width() / 2, 310))
+
+    pygame.display.update()
+    return play_rect, exit_rect
+
+# Show start menu loop
+def show_start_screen():
+    while True:
+        play_rect, exit_rect = draw_menu()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                m_x, m_y = pygame.mouse.get_pos()
+                if play_rect.collidepoint((m_x, m_y)):
+                    return
+                if exit_rect.collidepoint((m_x, m_y)):
+                    pygame.quit()
+                    exit()
+
 # Main game loop
 def main():
-    global hangman_status
-    global guessed
-    global word
-    global current_level
+    global hangman_status, guessed, word, hint, current_level
 
     hangman_status = 0
     guessed = []
     word = random.choice(level_words[current_level]).upper()
+    hint = level_hints.get(word, "No hint available")
 
-    # Reset letter visibility
+    # Reset buttons
     for letter in letters:
         letter[3] = True
 
-    FPS = 60
     clock = pygame.time.Clock()
     run = True
 
@@ -129,39 +188,33 @@ def main():
                 m_x, m_y = pygame.mouse.get_pos()
                 for letter in letters:
                     x, y, ltr, visible = letter
-                    if visible:
-                        dis = math.sqrt((x - m_x) ** 2 + (y - m_y) ** 2)
-                        if dis < RADIUS:
-                            letter[3] = False
-                            guessed.append(ltr)
-                            if ltr not in word:
-                                hangman_status += 1
+                    if visible and math.hypot(x - m_x, y - m_y) < RADIUS:
+                        letter[3] = False
+                        guessed.append(ltr)
+                        if ltr not in word:
+                            hangman_status += 1
 
         draw()
 
-        # Win check
-        won = True
-        for letter in word:
-            if letter != " " and letter not in guessed:
-                won = False
-                break
-
-        if won:
+        # Check win
+        if all(l in guessed or l == " " for l in word):
             if current_level < max_level:
                 display_message(f"You WON Level {current_level}!")
                 current_level += 1
             else:
                 display_message("🎉 You beat all levels!")
-                pygame.quit()
-                return
-            break  # Go to the next level
+                current_level = 1
+                show_start_screen()
+            return
 
-        # Loss check
+        # Check loss
         if hangman_status == 6:
             display_message(f"You LOST! The word was: {word}")
-            current_level = 1  # Reset to Level 1
-            break  # Restart the game at Level 1
+            current_level = 1
+            show_start_screen()
+            return
 
-# Game loop that keeps restarting
+# Game loop
+show_start_screen()
 while True:
     main()
