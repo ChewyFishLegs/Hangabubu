@@ -14,6 +14,9 @@ GAP = 15
 FPS = 60
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+GREY = (200, 200, 200)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
 
 # Fonts
 LETTER_FONT = pygame.font.SysFont('comicsans', 40)
@@ -87,7 +90,6 @@ level_hints = {
 
 # Draw everything
 def draw():
-    #win.blit(background, (0, 0))
     win.fill(WHITE)
     title = TITLE_FONT.render(f"LEVEL {current_level} - HANGABUBU", 1, BLACK)
     win.blit(title, (WIDTH / 2 - title.get_width() / 2, 20))
@@ -113,7 +115,17 @@ def draw():
     hint_text = HINT_FONT.render(f"Hint: {hint}", 1, BLACK)
     win.blit(hint_text, (WIDTH / 2 - hint_text.get_width() / 2, HEIGHT / 2 + 100))
 
+    # Draw menu button (top-right)
+    menu_button_rect = pygame.Rect(WIDTH - 110, 20, 90, 40)
+    pygame.draw.rect(win, GREY, menu_button_rect, border_radius=8)
+    menu_text = LETTER_FONT.render("Menu", True, BLACK)
+    win.blit(menu_text, (
+        menu_button_rect.centerx - menu_text.get_width() // 2,
+        menu_button_rect.centery - menu_text.get_height() // 2
+    ))
+
     pygame.display.update()
+    return menu_button_rect
 
 # Show a message (win/lose)
 def display_message(message):
@@ -161,6 +173,39 @@ def show_start_screen():
                     pygame.quit()
                     exit()
 
+def confirm_menu_return():
+    dialog_rect = pygame.Rect(WIDTH / 2 - 200, HEIGHT / 2 - 100, 400, 200)
+    yes_rect = pygame.Rect(dialog_rect.left + 50, dialog_rect.bottom - 60, 100, 40)
+    no_rect = pygame.Rect(dialog_rect.right - 150, dialog_rect.bottom - 60, 100, 40)
+
+    while True:
+        pygame.draw.rect(win, WHITE, dialog_rect)
+        pygame.draw.rect(win, BLACK, dialog_rect, 2)
+
+        msg = WORD_FONT.render("Return to menu?", True, BLACK)
+        win.blit(msg, (dialog_rect.centerx - msg.get_width() // 2, dialog_rect.top + 30))
+
+        pygame.draw.rect(win, GREEN, yes_rect)
+        pygame.draw.rect(win, RED, no_rect)
+
+        yes_text = LETTER_FONT.render("Yes", True, BLACK)
+        no_text = LETTER_FONT.render("No", True, BLACK)
+
+        win.blit(yes_text, (yes_rect.centerx - yes_text.get_width() // 2, yes_rect.centery - yes_text.get_height() // 2))
+        win.blit(no_text, (no_rect.centerx - no_text.get_width() // 2, no_rect.centery - no_text.get_height() // 2))
+
+        pygame.display.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if yes_rect.collidepoint(event.pos):
+                    return True
+                elif no_rect.collidepoint(event.pos):
+                    return False
+
 # Main game loop
 def main():
     global hangman_status, guessed, word, hint, current_level
@@ -170,7 +215,7 @@ def main():
     word = random.choice(level_words[current_level]).upper()
     hint = level_hints.get(word, "No hint available")
 
-    # Reset buttons
+    # Reset letters
     for letter in letters:
         letter[3] = True
 
@@ -179,13 +224,25 @@ def main():
 
     while run:
         clock.tick(FPS)
+        menu_button_rect = draw()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return
+
             if event.type == pygame.MOUSEBUTTONDOWN:
                 m_x, m_y = pygame.mouse.get_pos()
+
+                # Handle menu button click
+                if menu_button_rect.collidepoint((m_x, m_y)):
+                    if confirm_menu_return():
+                        current_level = 1
+                        show_start_screen()
+                        return
+                    continue  # Skip checking letters if menu was clicked
+
+                # Handle letter button clicks
                 for letter in letters:
                     x, y, ltr, visible = letter
                     if visible and math.hypot(x - m_x, y - m_y) < RADIUS:
@@ -194,20 +251,19 @@ def main():
                         if ltr not in word:
                             hangman_status += 1
 
-        draw()
-
-        # Check win
+        # Check for win
         if all(l in guessed or l == " " for l in word):
+            pygame.time.delay(500)  # prevents double-click skipping
             if current_level < max_level:
                 display_message(f"You WON Level {current_level}!")
                 current_level += 1
             else:
                 display_message("🎉 You beat all levels!")
                 current_level = 1
-                show_start_screen()
+            pygame.event.clear()
             return
 
-        # Check loss
+        # Check for loss
         if hangman_status == 6:
             display_message(f"You LOST! The word was: {word}")
             current_level = 1
