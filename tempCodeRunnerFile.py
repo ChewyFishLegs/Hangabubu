@@ -4,7 +4,7 @@ import random
 
 # Setup display
 pygame.init()
-WIDTH, HEIGHT = 800, 500
+WIDTH, HEIGHT = 1280, 720
 win = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Hangman Game!")
 
@@ -20,40 +20,12 @@ for i in range(26):
     y = starty + ((i // 13) * (GAP + RADIUS * 2))
     letters.append([x, y, chr(A + i), True])
 
+BUTTON_HOVER = (170, 170, 170)
+BUTTON_COLOR = (200, 200, 200)
 # Fonts
 LETTER_FONT = pygame.font.SysFont('comicsans', 40)
 WORD_FONT = pygame.font.SysFont('comicsans', 60)
 TITLE_FONT = pygame.font.SysFont('comicsans', 70)
-
-# ----- UI Button Class -----
-class Button:
-    def __init__(self, x, y, width, height, text, font, base_color, hover_color, text_color=000000):
-        self.rect = pygame.Rect(x, y, width, height)
-        self.text = text
-        self.font = font
-        self.base_color = base_color
-        self.hover_color = hover_color
-        self.text_color = text_color
-        self.hovered = False
-
-    def draw(self, win):
-        color = self.hover_color if self.hovered else self.base_color
-        pygame.draw.rect(win, color, self.rect, border_radius=12)
-        text_surface = self.font.render(self.text, True, self.text_color)
-        win.blit(
-            text_surface,
-            (
-                self.rect.centerx - text_surface.get_width() / 2,
-                self.rect.centery - text_surface.get_height() / 2
-            )
-        )
-
-    def is_hovered(self, mouse_pos):
-        self.hovered = self.rect.collidepoint(mouse_pos)
-
-    def is_clicked(self, mouse_pos):
-        return self.rect.collidepoint(mouse_pos)
-
 
 # Load hangman images
 images = []
@@ -109,55 +81,151 @@ def draw():
     win.blit(text, (WIDTH / 2 - text.get_width() / 2, 200))
 
     # Draw letter buttons
+    # for letter in letters:
+    #     x, y, ltr, visible = letter
+    #     if visible:
+    #         pygame.draw.circle(win, BLACK, (x, y), RADIUS, 3)
+    #         text = LETTER_FONT.render(ltr, 1, BLACK)
+    #         win.blit(text, (x - text.get_width() / 2, y - text.get_height() / 2))
+    mouse_pos = pygame.mouse.get_pos()
     for letter in letters:
         x, y, ltr, visible = letter
         if visible:
+            if math.sqrt((x - mouse_pos[0]) ** 2 + (y - mouse_pos[1]) ** 2) < RADIUS:
+                pygame.draw.circle(win, (100, 100, 250), (x, y), RADIUS)  # hover fill color
+            else:
+                pygame.draw.circle(win, (150, 150, 150), (x, y), RADIUS)  # default fill color
             pygame.draw.circle(win, BLACK, (x, y), RADIUS, 3)
             text = LETTER_FONT.render(ltr, 1, BLACK)
             win.blit(text, (x - text.get_width() / 2, y - text.get_height() / 2))
+
 
     # Draw hangman image
     win.blit(images[hangman_status], (150, 100))
     pygame.display.update()
 
 # Message display
+# def display_message(message):
+#     pygame.time.delay(1000)
+#     win.fill(WHITE)
+#     text = WORD_FONT.render(message, 1, BLACK)
+#     win.blit(text, (WIDTH / 2 - text.get_width() / 2, HEIGHT / 2 - text.get_height() / 2))
+#     pygame.display.update()
+#     pygame.time.delay(3000)
+
+# Message display
 def display_message(message):
     pygame.time.delay(1000)
-    win.fill(WHITE)
+    if background:
+        win.blit(background, (0, 0))
+    else:
+        win.fill(WHITE)
     text = WORD_FONT.render(message, 1, BLACK)
     win.blit(text, (WIDTH / 2 - text.get_width() / 2, HEIGHT / 2 - text.get_height() / 2))
     pygame.display.update()
     pygame.time.delay(3000)
 
-# Menu start
-def show_start_screen():
-    play_button = Button(WIDTH // 2 - 100, 200, 200, 60, "Play", WORD_FONT, (200, 200, 200), (170, 170, 170))
-    exit_button = Button(WIDTH // 2 - 100, 300, 200, 60, "Exit", WORD_FONT, (200, 200, 200), (170, 170, 170))
+# # Menu of the game
+# def draw_menu():
+#     win.fill(WHITE)
+#     title_text = TITLE_FONT.render("HANGABUBU", 1, BLACK)
+#     win.blit(title_text, (WIDTH / 2 - title_text.get_width() / 2, 100))
 
-    while True:
+#     # Draw Play button
+#     play_text = WORD_FONT.render("Play", 1, BLACK)
+#     play_rect = pygame.Rect(WIDTH / 2 - 100, 200, 200, 60)
+#     pygame.draw.rect(win, (200, 200, 200), play_rect)
+#     win.blit(play_text, (WIDTH / 2 - play_text.get_width() / 2, 210))
+
+#     # Draw Exit button
+#     exit_text = WORD_FONT.render("Exit", 1, BLACK)
+#     exit_rect = pygame.Rect(WIDTH / 2 - 100, 300, 200, 60)
+#     pygame.draw.rect(win, (200, 200, 200), exit_rect)
+#     win.blit(exit_text, (WIDTH / 2 - exit_text.get_width() / 2, 310))
+
+#     pygame.display.update()
+#     return play_rect, exit_rect
+
+# def draw_menu():
+#     win.fill(WHITE)
+#     title_text = TITLE_FONT.render("HANGABUBU", 1, BLACK)
+#     win.blit(title_text, (WIDTH / 2 - title_text.get_width() / 2, 100))
+
+#     mouse_pos = pygame.mouse.get_pos()
+
+#     # Play button
+#     play_rect = pygame.Rect(WIDTH / 2 - 100, 200, 200, 60)
+#     if play_rect.collidepoint(mouse_pos):
+#         pygame.draw.rect(win, (170, 170, 170), play_rect)  # lighter gray on hover
+#     else:
+#         pygame.draw.rect(win, (200, 200, 200), play_rect)
+
+#     play_text = WORD_FONT.render("Play", 1, BLACK)
+#     win.blit(play_text, (WIDTH / 2 - play_text.get_width() / 2, 210))
+
+#     # Exit button
+#     exit_rect = pygame.Rect(WIDTH / 2 - 100, 300, 200, 60)
+#     if exit_rect.collidepoint(mouse_pos):
+#         pygame.draw.rect(win, (170, 170, 170), exit_rect)
+#     else:
+#         pygame.draw.rect(win, (200, 200, 200), exit_rect)
+
+#     exit_text = WORD_FONT.render("Exit", 1, BLACK)
+#     win.blit(exit_text, (WIDTH / 2 - exit_text.get_width() / 2, 310))
+
+#     pygame.display.update()
+#     return play_rect, exit_rect
+
+# Menu of the game with hover and rounded corners
+
+def draw_menu():
+    if background:
+        win.blit(background, (0, 0))
+    else:
         win.fill(WHITE)
-        title_text = TITLE_FONT.render("HANGABUBU", True, BLACK)
-        win.blit(title_text, (WIDTH // 2 - title_text.get_width() // 2, 100))
 
-        mouse_pos = pygame.mouse.get_pos()
-        play_button.is_hovered(mouse_pos)
-        exit_button.is_hovered(mouse_pos)
-        play_button.draw(win)
-        exit_button.draw(win)
+    title_text = TITLE_FONT.render("HANGABUBU", 1, BLACK)
+    win.blit(title_text, (WIDTH / 2 - title_text.get_width() / 2, 100))
 
-        pygame.display.update()
+    mouse_pos = pygame.mouse.get_pos()
 
+    # Play button
+    play_rect = pygame.Rect(WIDTH / 2 - 100, 200, 200, 60)
+    if play_rect.collidepoint(mouse_pos):
+        pygame.draw.rect(win, BUTTON_HOVER, play_rect, border_radius=12)
+    else:
+        pygame.draw.rect(win, BUTTON_COLOR, play_rect, border_radius=12)
+    play_text = WORD_FONT.render("Play", 1, BLACK)
+    win.blit(play_text, (WIDTH / 2 - play_text.get_width() / 2, 210))
+
+    # Exit button
+    exit_rect = pygame.Rect(WIDTH / 2 - 100, 300, 200, 60)
+    if exit_rect.collidepoint(mouse_pos):
+        pygame.draw.rect(win, BUTTON_HOVER, exit_rect, border_radius=12)
+    else:
+        pygame.draw.rect(win, BUTTON_COLOR, exit_rect, border_radius=12)
+    exit_text = WORD_FONT.render("Exit", 1, BLACK)
+    win.blit(exit_text, (WIDTH / 2 - exit_text.get_width() / 2, 310))
+
+    pygame.display.update()
+    return play_rect, exit_rect
+
+
+# The start screen of the game:
+def show_start_screen():
+    while True:
+        play_rect, exit_rect = draw_menu()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                if play_button.is_clicked(mouse_pos):
-                    return  # Start game
-                elif exit_button.is_clicked(mouse_pos):
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                m_x, m_y = pygame.mouse.get_pos()
+                if play_rect.collidepoint((m_x, m_y)):
+                    return  # Start the game
+                if exit_rect.collidepoint((m_x, m_y)):
                     pygame.quit()
                     exit()
-
 
 # Main game loop
 def main():
