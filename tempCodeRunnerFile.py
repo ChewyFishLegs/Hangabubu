@@ -9,8 +9,8 @@ win = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Hangman Game!")
 
 # Constants
-RADIUS = 20
-GAP = 15
+RADIUS = 30
+GAP = 20
 FPS = 60
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -19,10 +19,12 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 
 # Fonts
-LETTER_FONT = pygame.font.SysFont('comicsans', 40)
-WORD_FONT = pygame.font.SysFont('comicsans', 60)
-TITLE_FONT = pygame.font.SysFont('comicsans', 70)
-HINT_FONT = pygame.font.SysFont('comicsans', 30)  # Smaller size
+font_path = 'D:\GitHub\Hangabubu\LuckiestGuy-Regular.ttf'
+LETTER_FONT = pygame.font.Font(font_path, 40)
+WORD_FONT = pygame.font.Font(font_path, 60)
+TITLE_FONT = pygame.font.Font(font_path, 70)
+HINT_FONT = pygame.font.Font(font_path, 30)  # Smaller size
+
 
 
 # Game variables
@@ -51,12 +53,70 @@ for i in range(7):
 
 # Button positions for letters
 letters = []
-startx = round((WIDTH - (RADIUS * 2 + GAP) * 13) / 2)
-starty = 400
+startx = (WIDTH - (RADIUS * 2 + GAP) * 13) // 2
+starty = HEIGHT - 100
 for i in range(26):
     x = startx + GAP * 2 + ((RADIUS * 2 + GAP) * (i % 13))
     y = starty + ((i // 13) * (GAP + RADIUS * 2))
     letters.append([x, y, chr(65 + i), True])
+
+
+
+def draw_button(win, x, y, letter, is_hovered):
+    color = GREEN if is_hovered else GREY
+    pygame.draw.circle(win, color, (x, y), RADIUS)
+    text = LETTER_FONT.render(letter, True, BLACK)
+    text_rect = text.get_rect(center=(x, y))
+    win.blit(text, text_rect)
+
+
+# Draw everything
+def draw():
+    win.fill(WHITE)
+    title = TITLE_FONT.render(f"LEVEL {current_level} - HANGABUBU", 1, BLACK)
+    win.blit(title, (WIDTH / 2 - title.get_width() / 2, 20))
+
+    # Display the current word
+    display_word = ""
+    for letter in word:
+        display_word += (letter + " ") if letter in guessed else ("  " if letter == " " else "_ ")
+    text = WORD_FONT.render(display_word, 1, BLACK)
+    win.blit(text, (WIDTH / 2 - text.get_width() / 2, 200))
+
+     # Get mouse position for hover detection
+    m_x, m_y = pygame.mouse.get_pos()
+
+    # Draw letter buttons
+    for x, y, ltr, visible in letters:
+        if visible:
+            # Check hover
+            dist = math.hypot(x - m_x, y - m_y)
+            is_hovered = dist < RADIUS
+            color = GREEN if is_hovered else GREY
+            pygame.draw.circle(win, color, (x, y), RADIUS)
+            pygame.draw.circle(win, BLACK, (x, y), RADIUS, 3)  # border
+            ltr_text = LETTER_FONT.render(ltr, 1, BLACK)
+            win.blit(ltr_text, (x - ltr_text.get_width() / 2, y - ltr_text.get_height() / 2)) 
+
+    # Draw hangman
+    win.blit(images[hangman_status], (150, 100))
+
+    # Draw hint
+    hint_text = HINT_FONT.render(f"Hint: {hint}", 1, BLACK)
+    win.blit(hint_text, (WIDTH / 2 - hint_text.get_width() / 2, HEIGHT / 2 + 100))
+
+    # Draw menu button (top-right)
+    menu_button_rect = pygame.Rect(WIDTH - 110, 20, 90, 40)
+    pygame.draw.rect(win, GREY, menu_button_rect, border_radius=8)
+    menu_text = LETTER_FONT.render("Menu", True, BLACK)
+    win.blit(menu_text, (
+        menu_button_rect.centerx - menu_text.get_width() // 2,
+        menu_button_rect.centery - menu_text.get_height() // 2
+    ))
+
+    pygame.display.update()
+    return menu_button_rect
+
 
 # Words and hints
 level_words = {
@@ -88,44 +148,6 @@ level_hints = {
     "EXTRAORDINARY": "Something very unusual or remarkable."
 }
 
-# Draw everything
-def draw():
-    win.fill(WHITE)
-    title = TITLE_FONT.render(f"LEVEL {current_level} - HANGABUBU", 1, BLACK)
-    win.blit(title, (WIDTH / 2 - title.get_width() / 2, 20))
-
-    # Display the current word
-    display_word = ""
-    for letter in word:
-        display_word += (letter + " ") if letter in guessed else ("  " if letter == " " else "_ ")
-    text = WORD_FONT.render(display_word, 1, BLACK)
-    win.blit(text, (WIDTH / 2 - text.get_width() / 2, 200))
-
-    # Draw letter buttons
-    for x, y, ltr, visible in letters:
-        if visible:
-            pygame.draw.circle(win, BLACK, (x, y), RADIUS, 3)
-            ltr_text = LETTER_FONT.render(ltr, 1, BLACK)
-            win.blit(ltr_text, (x - ltr_text.get_width() / 2, y - ltr_text.get_height() / 2))
-
-    # Draw hangman
-    win.blit(images[hangman_status], (150, 100))
-
-    # Draw hint
-    hint_text = HINT_FONT.render(f"Hint: {hint}", 1, BLACK)
-    win.blit(hint_text, (WIDTH / 2 - hint_text.get_width() / 2, HEIGHT / 2 + 100))
-
-    # Draw menu button (top-right)
-    menu_button_rect = pygame.Rect(WIDTH - 110, 20, 90, 40)
-    pygame.draw.rect(win, GREY, menu_button_rect, border_radius=8)
-    menu_text = LETTER_FONT.render("Menu", True, BLACK)
-    win.blit(menu_text, (
-        menu_button_rect.centerx - menu_text.get_width() // 2,
-        menu_button_rect.centery - menu_text.get_height() // 2
-    ))
-
-    pygame.display.update()
-    return menu_button_rect
 
 # Show a message (win/lose)
 def display_message(message):
@@ -139,7 +161,7 @@ def display_message(message):
 # Draw menu screen
 def draw_menu():
     win.fill(WHITE)
-    title = TITLE_FONT.render("HANGABUBU", 1, BLACK)
+    title = TITLE_FONT.render("HANGABUBU", True, (0,0,0))
     win.blit(title, (WIDTH / 2 - title.get_width() / 2, 100))
 
     # Play button
