@@ -51,22 +51,39 @@ for i in range(7):
         image = pygame.Surface((100, 100))  # Placeholder
     images.append(image)
 
-# Button positions for letters
 letters = []
-startx = (WIDTH - (RADIUS * 2 + GAP) * 13) // 2
-starty = HEIGHT - 100
+RADIUS = 30
+GAP = 20
+A = 65
+startx = round((WIDTH - (RADIUS * 2 + GAP) * 13) / 2)  # 13 letters per row
+starty = 550  # vertical position
+
 for i in range(26):
     x = startx + GAP * 2 + ((RADIUS * 2 + GAP) * (i % 13))
     y = starty + ((i // 13) * (GAP + RADIUS * 2))
-    letters.append([x, y, chr(65 + i), True])
+    letters.append([x, y, chr(A + i), True])
 
 
+
+
+# def draw_button(win, x, y, letter, is_hovered):
+#     color = GREEN if is_hovered else GREY
+#     pygame.draw.circle(win, color, (x, y), RADIUS)
+#     text = LETTER_FONT.render(letter, True, BLACK)
+#     text_rect = text.get_rect(center=(x, y))
+#     win.blit(text, text_rect)
 
 def draw_button(win, x, y, letter, is_hovered):
     color = GREEN if is_hovered else GREY
-    pygame.draw.circle(win, color, (x, y), RADIUS)
+    button_rect = pygame.Rect(x - RADIUS, y - RADIUS, RADIUS * 2, RADIUS * 2)
+
+    # Draw rounded rectangle
+    pygame.draw.rect(win, color, button_rect, border_radius=12)
+    pygame.draw.rect(win, BLACK, button_rect, 3, border_radius=12)
+
+    # Center and draw letter
     text = LETTER_FONT.render(letter, True, BLACK)
-    text_rect = text.get_rect(center=(x, y))
+    text_rect = text.get_rect(center=button_rect.center)
     win.blit(text, text_rect)
 
 
@@ -86,17 +103,24 @@ def draw():
      # Get mouse position for hover detection
     m_x, m_y = pygame.mouse.get_pos()
 
-    # Draw letter buttons
+    # # Draw letter buttons
+    # for x, y, ltr, visible in letters:
+    #     if visible:
+    #         # Check hover
+    #         dist = math.hypot(x - m_x, y - m_y)
+    #         is_hovered = dist < RADIUS
+    #         color = GREEN if is_hovered else GREY
+    #         pygame.draw.circle(win, color, (x, y), RADIUS)
+    #         pygame.draw.circle(win, BLACK, (x, y), RADIUS, 3)  # border
+    #         ltr_text = LETTER_FONT.render(ltr, 1, BLACK)
+    #         win.blit(ltr_text, (x - ltr_text.get_width() / 2, y - ltr_text.get_height() / 2)) 
+
     for x, y, ltr, visible in letters:
         if visible:
-            # Check hover
             dist = math.hypot(x - m_x, y - m_y)
             is_hovered = dist < RADIUS
-            color = GREEN if is_hovered else GREY
-            pygame.draw.circle(win, color, (x, y), RADIUS)
-            pygame.draw.circle(win, BLACK, (x, y), RADIUS, 3)  # border
-            ltr_text = LETTER_FONT.render(ltr, 1, BLACK)
-            win.blit(ltr_text, (x - ltr_text.get_width() / 2, y - ltr_text.get_height() / 2)) 
+            draw_button(win, x, y, ltr, is_hovered)
+
 
     # Draw hangman
     win.blit(images[hangman_status], (150, 100))
