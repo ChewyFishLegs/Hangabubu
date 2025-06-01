@@ -4,7 +4,6 @@ import random
 
 # Initialize Pygame and set up display
 pygame.init()
-pygame.mixer.init()
 WIDTH, HEIGHT = 1280, 720
 win = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Hangman Game!")
@@ -14,7 +13,6 @@ RADIUS = 30
 GAP = 20
 FPS = 60
 WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
 GREY = (200, 200, 200)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
@@ -32,9 +30,13 @@ pygame.mixer.music.load("background_music.mp3")
 pygame.mixer.music.set_volume(0.3)
 pygame.mixer.music.play(-1)
 
+
 # Load sound effects
 correct_sound = pygame.mixer.Sound("correct.mp3")
 wrong_sound = pygame.mixer.Sound("wrong.mp3")
+lose_sound = pygame.mixer.Sound("lose.mp3")
+
+
 
 # Game variables
 hangman_status = 0
@@ -49,6 +51,8 @@ try:
 except:
     background = pygame.Surface((WIDTH, HEIGHT))
     background.fill(WHITE)
+
+
 
 # Hangman images
 images = []
@@ -75,13 +79,14 @@ for i in range(26):
 
 import random
 
-HOVER_COLORS = [
-    (0, 255, 0),    # Green
-    (255, 0, 0),    # Red
-    (0, 0, 255),    # Blue
-    (255, 165, 0),  # Orange
-    (255, 255, 0),  # Yellow
-    (128, 0, 128),  # Purple
+HOVER_COLORS = [   
+    (143, 224, 255),    
+    (255, 173, 143),   
+    (255, 243, 100),  
+    (143, 166, 255),
+    (143, 193, 255),   
+    (255, 237, 143), 
+    (207, 240, 255)
 ]
 
 hover_color_cache = {}
@@ -96,16 +101,16 @@ def draw_button(win, x, y, letter, is_hovered):
         # Clear cache when not hovered
         if letter in hover_color_cache:
             del hover_color_cache[letter]
-        color = GREY
+        color = (255, 180, 100)
 
     button_rect = pygame.Rect(x - RADIUS, y - RADIUS, RADIUS * 2, RADIUS * 2)
 
     # Draw rounded rectangle
     pygame.draw.rect(win, color, button_rect, border_radius=12)
-    pygame.draw.rect(win, BLACK, button_rect, 3, border_radius=12)
+    pygame.draw.rect(win, (40, 17, 7), button_rect, 3, border_radius=12)
 
     # Center and draw letter using helper function
-    text = LETTER_FONT.render(letter, True, BLACK)
+    text = LETTER_FONT.render(letter, True, (40, 17, 7))
     draw_centered_text(text, button_rect)
 
 
@@ -113,18 +118,16 @@ def draw_button(win, x, y, letter, is_hovered):
 # Draw everything
 def draw():
     win.blit(background, (0, 0))
-    title = TITLE_FONT.render(f"LEVEL {current_level}", 1, BLACK)
+    title = TITLE_FONT.render(f"LEVEL {current_level}", 1, (40, 17, 7))
     win.blit(title, (WIDTH / 2 - title.get_width() / 2, 20))
 
     # Display the current word
     display_word = ""
     for letter in word:
         display_word += (letter + " ") if letter in guessed else ("  " if letter == " " else "_  ")
-    # text = WORD_FONT.render(display_word, 1, BLACK)
-    # win.blit(text, (640, 300) )
 
     # Render the combined string
-    word_text = WORD_FONT.render(display_word.strip(), True, (0, 0, 0))  # BLACK
+    word_text = WORD_FONT.render(display_word.strip(), True, (40, 17, 7))  
 
     # Center the text horizontally at y=600 (you can adjust y as needed)
     word_rect = word_text.get_rect(center=(1280 // 2, 400)) 
@@ -148,7 +151,7 @@ def draw():
     win.blit(images[hangman_status], (150, 100))
 
     # Draw hint
-    hint_text = HINT_FONT.render(f"Hint: {hint}", 1, BLACK)
+    hint_text = HINT_FONT.render(f"Hint: {hint}", 1, (40, 17, 7))
     win.blit(hint_text, (WIDTH / 2 - hint_text.get_width() / 2, HEIGHT / 2 + 100))
 
     # Another window from 'Menu' Top-Right
@@ -164,10 +167,10 @@ def draw():
 
     # Draw the button background (optional)
     pygame.draw.rect(win, menu_color, menu_button_rect, border_radius=10)
-    pygame.draw.rect(win, BLACK, menu_button_rect, 3, border_radius=10)
+    pygame.draw.rect(win, (40, 17, 7), menu_button_rect, 3, border_radius=10)
 
 
-    menu_text = LETTER_FONT.render("Menu", True, BLACK)
+    menu_text = LETTER_FONT.render("Menu", True, (40, 17, 7))
     draw_centered_text(menu_text, menu_button_rect)
 
 
@@ -178,41 +181,41 @@ def draw():
 
 # Words and hints
 level_words = {
-    1: ["CAT", "DOG", "CAR", "TREE"],
-    2: ["PYTHON", "ROCKET", "PLANET", "MOUSE"],
-    3: ["ELEPHANT", "NOTEBOOK", "PYRAMID", "GIRAFFE"],
-    4: ["ASTRONOMER", "BACKPACKING", "CONTROLLER"],
-    5: ["INCONCEIVABLE", "MICROPROCESSOR", "EXTRAORDINARY"]
+    1: ["LOOP", "MAC", "JAVA", "UNO"],
+    2: ["PYTHON", "DATABASE", "AUTOMATA", "BINARY"],
+    3: ["ALGORITHM", "KEYBOARD", "FUNCTION", "VARIABLE"],
+    4: ["ALEX EALA", "DEBUGGING", "SIR RYAN"],
+    5: ["ENCAPSULATION", "MICROPROCESSOR", "LINKEDLIST"]
 }
 
 level_hints = {
-    "CAT": "A small pet animal.",
-    "DOG": "Man's best friend.",
-    "CAR": "A vehicle with four wheels.",
-    "TREE": "A tall plant with branches and leaves.",
-    "PYTHON": "A popular programming language.",
-    "ROCKET": "A vehicle used for space travel.",
-    "PLANET": "A large celestial body orbiting a star.",
-    "MOUSE": "A small rodent or a computer device.",
-    "ELEPHANT": "A large mammal with a trunk.",
-    "NOTEBOOK": "A type of portable computer.",
-    "PYRAMID": "A triangular-shaped structure, often seen in Egypt.",
-    "GIRAFFE": "A tall animal with a long neck.",
-    "ASTRONOMER": "A scientist who studies the stars.",
-    "BACKPACKING": "Traveling with a backpack, often hiking.",
-    "CONTROLLER": "A device used to control something, like a game console.",
-    "INCONCEIVABLE": "Something unimaginable or unbelievable.",
-    "MICROPROCESSOR": "The brain of a computer, which executes instructions.",
-    "EXTRAORDINARY": "Something very unusual or remarkable."
+    "LOOP": "Repeats code",
+    "MAC": "Hindi Bintana",
+    "JAVA": "Rice, Minecraft",
+    "UNO": "Favorite grade",
+    "PYTHON": "Snake",
+    "DATABASE": "Organized data storage tool",
+    "AUTOMATA": "Machine that works alone",
+    "BINARY": "1 or 0",
+    "ALGORITHM": "Steps to solve a problem",
+    "KEYBOARD": "Ginagamit ng mga online warriors",
+    "FUNCTION": "Group of code that runs",
+    "VARIABLE": "x, y, z, i",
+    "ALEX EALA": "Tennis Player",
+    "DEBUGGING": "Using Pesticides in code",
+    "SIR RYAN": "Best Prof",
+    "ENCAPSULATION": "Hides data in code",
+    "MICROPROCESSOR": "Small chip that runs computer",
+    "LINKED LIST": "Nodes connected one by one",
 }
 
 
 # Show a message (win/lose)
 def display_message(message):
     pygame.time.delay(1000)
-    win.fill(WHITE)
+    win.blit(background, (0, 0))
     
-    text = WORD_FONT.render(message, 1, BLACK)
+    text = WORD_FONT.render(message, 1, (40, 17, 7))
     center_rect = pygame.Rect(0, 0, WIDTH, HEIGHT)
     draw_centered_text(text, center_rect, y_offset=0)
 
@@ -227,9 +230,16 @@ def draw_centered_text(text_surf, rect, y_offset=5):
 def draw_menu():
     win.blit(background, (0, 0))
 
-    # Title
-    title = TITLE_FONT.render("HANGABUBU", True, (0, 0, 0))
-    win.blit(title, (WIDTH / 2 - title.get_width() / 2, 180))  # lowered title
+    logo_image = pygame.image.load("logo.png")
+    logo_ratio = logo_image.get_width() / logo_image.get_height()
+    new_height = 250  # fit within screen height
+    new_width = int(new_height * logo_ratio)
+    logo_image = pygame.transform.scale(logo_image, (new_width, new_height))
+
+    # Center the logo horizontally
+    logo_x = (WIDTH - logo_image.get_width()) // 2
+    logo_y = 50  # vertical offset from top
+    win.blit(logo_image, (logo_x, logo_y))
 
     # Get mouse position
     mouse_pos = pygame.mouse.get_pos()
@@ -239,24 +249,24 @@ def draw_menu():
     exit_rect = pygame.Rect(WIDTH / 2 - 120, 400, 240, 70)
 
 
-     # --- PLAY button ---
+     # --- START button ---
     play_hover = play_rect.collidepoint(mouse_pos)
-    play_color = (100, 255, 100) if play_hover else (200, 200, 200)  # green on hover
+    play_color = (239, 175, 48) if play_hover else (255, 216, 143)  # green on hover
     pygame.draw.rect(win, play_color, play_rect, border_radius=12)
-    pygame.draw.rect(win, BLACK, play_rect, width=3, border_radius=12)
+    pygame.draw.rect(win, (40, 17, 7), play_rect, width=3, border_radius=12)
 
-    play_text = WORD_FONT.render("Start", True, BLACK)
+    play_text = WORD_FONT.render("Start", True, (40, 17, 7))
     draw_centered_text(play_text, play_rect)
 
 
 
     # --- EXIT button ---
     exit_hover = exit_rect.collidepoint(mouse_pos)
-    exit_color = (255, 120, 120) if exit_hover else (200, 200, 200)  # red on hover
+    exit_color = (68, 180, 236) if exit_hover else (207, 240, 255)  # red on hover
     pygame.draw.rect(win, exit_color, exit_rect, border_radius=12)
-    pygame.draw.rect(win, BLACK, exit_rect, width=3, border_radius=12)
+    pygame.draw.rect(win, (40, 17, 7), exit_rect, width=3, border_radius=12)
 
-    exit_text = WORD_FONT.render("Exit", True, BLACK)
+    exit_text = WORD_FONT.render("Exit", True, (40, 17, 7))
     draw_centered_text(exit_text, exit_rect)
 
 
@@ -291,28 +301,28 @@ def confirm_menu_return():
 
         # Dim background for focus effect
         dim_overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-        dim_overlay.fill((0, 0, 0, 100))  # Semi-transparent black
+        dim_overlay.fill((0, 0, 0, 100))  # Semi-transparent (40, 17, 7)
         win.blit(dim_overlay, (0, 0))
 
         # Draw dialog box with rounded corners
         pygame.draw.rect(win, (255, 255, 255), dialog_rect, border_radius=16)
-        pygame.draw.rect(win, (0, 0, 0), dialog_rect, 3, border_radius=16)
+        pygame.draw.rect(win, (40, 17, 7), dialog_rect, 3, border_radius=16)
 
         # Draw message text
-        msg = WORD_FONT.render("Return to menu?", True, BLACK)
+        msg = WORD_FONT.render("Return to menu?", True, (40, 17, 7))
         win.blit(msg, (dialog_rect.centerx - msg.get_width() // 2, dialog_rect.top + 40))
 
         # Determine button colors with hover effect
-        yes_color = (140, 255, 140) if yes_rect.collidepoint(mouse_pos) else (100, 255, 100)
-        no_color = (255, 140, 140) if no_rect.collidepoint(mouse_pos) else (255, 100, 100)
+        yes_color = (0, 204, 0) if yes_rect.collidepoint(mouse_pos) else (100, 255, 100)
+        no_color = (204, 0, 0) if no_rect.collidepoint(mouse_pos) else (255, 100, 100)
 
         # Draw buttons with rounded corners and hover colors
         pygame.draw.rect(win, yes_color, yes_rect, border_radius=12)
         pygame.draw.rect(win, no_color, no_rect, border_radius=12)
 
         # Button labels
-        yes_text = LETTER_FONT.render("Yes", True, BLACK)
-        no_text = LETTER_FONT.render("No", True, BLACK)
+        yes_text = LETTER_FONT.render("Yes", True, (40, 17, 7))
+        no_text = LETTER_FONT.render("No", True, (40, 17, 7))
 
        
         draw_centered_text(yes_text, yes_rect)
@@ -327,10 +337,8 @@ def confirm_menu_return():
                 exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if yes_rect.collidepoint(event.pos):
-                    wrong_sound.play()
                     return True
                 elif no_rect.collidepoint(event.pos):
-                    correct_sound.play()
                     return False
 
 
@@ -382,7 +390,6 @@ def main():
                         if ltr in word:
                             correct_sound.play()
 
-
         # Check for win
         if all(l in guessed or l == " " for l in word):
             pygame.time.delay(500)  # prevents double-click skipping
@@ -397,6 +404,8 @@ def main():
 
         # Check for loss
         if hangman_status == 6:
+            pygame.mixer.music.stop()  # Stop the background music
+            lose_sound.play()
             display_message(f"You LOST! The word was: {word}")
             current_level = 1
             show_start_screen()
