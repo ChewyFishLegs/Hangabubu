@@ -71,9 +71,17 @@ animation_data = [
     ("hangabubu_scared.png", 200, 200, 2),
     ]
 
+desired_width = 250
+desired_height = 250
+
 animations = []
 for path, fw, fh, steps in animation_data:
-    frames = create_sprite_animation(path, fw, fh, 1.0, steps, BLACK)
+    scale_x = desired_width / fw
+    scale_y = desired_height / fh
+    # if you want to preserve aspect ratio, use min(scale_x, scale_y)
+    scale = min(scale_x, scale_y)
+    
+    frames = create_sprite_animation(path, fw, fh, scale, steps, BLACK)
     animations.append(frames)
 
 # Animation control variables
@@ -202,10 +210,7 @@ def draw():
     current_frame = animations[hangman_status][frame_indices[hangman_status]]
     
     # Position the animation (adjust to your UI)
-    if hangman_status == 4:  # The bigger frame
-        pos = (750, 300) #Positioning of Labubu
-    else:
-        pos = (850, 300)
+    pos = (790, 300)
 
     win.blit(current_frame, pos)
 
@@ -402,7 +407,6 @@ def main():
     # Reset letters
     for letter in letters:
         letter[3] = True
-
     clock = pygame.time.Clock()
     run = True
 
