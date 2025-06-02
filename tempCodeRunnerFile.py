@@ -18,7 +18,7 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 
 # Fonts
-font_path = 'C:\GitHub\Hangabubu\LuckiestGuy-Regular.ttf'
+font_path = 'D:\GitHub\Hangabubu\LuckiestGuy-Regular.ttf'
 LETTER_FONT = pygame.font.Font(font_path, 40)
 WORD_FONT = pygame.font.Font(font_path, 60)
 TITLE_FONT = pygame.font.Font(font_path, 100)
