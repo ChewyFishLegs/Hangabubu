@@ -81,7 +81,7 @@ for path, fw, fh, steps in animation_data:
     # if you want to preserve aspect ratio, use min(scale_x, scale_y)
     scale = min(scale_x, scale_y)
     
-    frames = create_sprite_animation(path, fw, fh, scale, steps, BLACK)
+    frames = create_sprite_animation(path, fw, fh, scale, steps)
     animations.append(frames)
 
 # Animation control variables
