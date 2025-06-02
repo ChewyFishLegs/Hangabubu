@@ -33,8 +33,7 @@ pygame.mixer.music.play(-1)
 
 
 # Load sound effects
-win1_sound = pygame.mixer.Sound("win1.mp3")
-win2_sound = pygame.mixer.Sound("win2.mp3")
+
 correct_sound = pygame.mixer.Sound("correct.mp3")
 wrong_sound = pygame.mixer.Sound("wrong.mp3")
 lose_sound = pygame.mixer.Sound("lose.mp3")
@@ -407,7 +406,13 @@ def main():
 
         # Check for win
         if all(l in guessed or l == " " for l in word):
-          # prevents double-click skipping
+        # Show full word briefly before proceeding
+            guessed = list(set(guessed + [l for l in word]))  # Ensure full word is shown
+            draw()  # Redraw screen with the full word visible
+            pygame.display.update()
+            pygame.time.delay(1500)  # Wait 1.5 seconds
+
+    # Proceed to next level or end game
             if current_level < max_level:
                 display_message(f"The word was {word}!")
                 display_message("Next Level")
