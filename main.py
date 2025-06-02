@@ -54,6 +54,13 @@ except:
     background = pygame.Surface((WIDTH, HEIGHT))
     background.fill(WHITE)
 
+# The hanging noose
+try:
+    logo = pygame.image.load("Noose.png").convert_alpha()
+    logo = pygame.transform.scale(logo, (1100, 700))  # Adjust size as needed
+except Exception as e:
+    print("Failed to load logo image:", e)
+    logo = None
 
 
 # Hangman images
@@ -138,7 +145,6 @@ def draw():
     win.blit(word_text, word_rect)
 
 
-
      # Get mouse position for hover detection
     m_x, m_y = pygame.mouse.get_pos()
 
@@ -152,12 +158,16 @@ def draw():
     # Draw hangman
     win.blit(images[hangman_status], (150, 100))
 
+    if logo:
+        win.blit(logo, (350, 20))  # Adjust (x, y) position as needed
+
+
     # Draw hint
     hint_text = HINT_FONT.render(f"Hint: {hint}", 1, (40, 17, 7))
     win.blit(hint_text, (WIDTH / 2 - hint_text.get_width() / 2, HEIGHT / 2 + 100))
 
     # Another window from 'Menu' Top-Right
-    menu_x, menu_y = 1000, 30  # example position
+    menu_x, menu_y = 50, 30  # example position
     menu_width, menu_height = 200, 60  # example size
 
     menu_button_rect = pygame.Rect(menu_x, menu_y, menu_width, menu_height)
