@@ -22,7 +22,7 @@ SCREEN_HEIGHT = 500
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('Spritesheets')
 
-sprite_sheet_image = pygame.image.load('hangabubu_nervous_spritesheet.png').convert_alpha()
+sprite_sheet_image = pygame.image.load('hangabubu_textsprite_happy.png').convert_alpha()
 sprite_sheet = SpriteSheet(sprite_sheet_image)
 
 
@@ -32,13 +32,13 @@ WHITE = (255, 255, 255)
 
 #creae animation lit
 animation_list = []
-animation_steps = 8
+animation_steps = 2
 last_update = pygame.time.get_ticks()
-animation_cooldown = 200
+animation_cooldown = 500
 frame = 0
 
 for x in range(animation_steps):
-	animation_list.append(SpriteSheet.get_image(sprite_sheet, x, 98, 98, 1.0, BLACK))
+	animation_list.append(SpriteSheet.get_image(sprite_sheet, x, 180, 180, 1.0, BLACK))
 
 run = True
 while run:
