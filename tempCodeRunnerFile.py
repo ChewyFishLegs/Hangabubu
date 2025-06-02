@@ -17,12 +17,26 @@ GREY = (200, 200, 200)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 
-# Fonts
+# FontsC:\Users\bddel\Documents\GitHub\Hangabubu\main.py
 font_path = 'D:\GitHub\Hangabubu\LuckiestGuy-Regular.ttf'
+#Kamo lay adjust ani guys hahahaha
+
 LETTER_FONT = pygame.font.Font(font_path, 40)
 WORD_FONT = pygame.font.Font(font_path, 60)
 TITLE_FONT = pygame.font.Font(font_path, 100)
 HINT_FONT = pygame.font.Font(font_path, 30)  # Smaller size
+
+# Load and play background music
+pygame.mixer.music.load("background_music.mp3")
+pygame.mixer.music.set_volume(0.3)
+pygame.mixer.music.play(-1)
+
+
+# Load sound effects
+
+correct_sound = pygame.mixer.Sound("correct.mp3")
+wrong_sound = pygame.mixer.Sound("wrong.mp3")
+lose_sound = pygame.mixer.Sound("lose.mp3")
 
 
 
@@ -34,12 +48,19 @@ guessed = []
 
 # Background image
 try:
-    background = pygame.image.load("domii.jpg")
+    background = pygame.image.load("background.jpg")
     background = pygame.transform.scale(background, (WIDTH, HEIGHT))
 except:
-    print("Failed to load background image:", e)
     background = pygame.Surface((WIDTH, HEIGHT))
     background.fill(WHITE)
+
+# The hanging noose
+try:
+    logo = pygame.image.load("Noose.png").convert_alpha()
+    logo = pygame.transform.scale(logo, (1100, 700))  # Adjust size as needed
+except Exception as e:
+    print("Failed to load logo image:", e)
+    logo = None
 
 
 # Hangman images
@@ -51,15 +72,6 @@ for i in range(7):
         print(f"Missing image: hangman{i}.png")
         image = pygame.Surface((800, 380))  # Placeholder
     images.append(image)
-
-# The hanging noose
-try:
-    logo = pygame.image.load("Noose.png").convert_alpha()
-    logo = pygame.transform.scale(logo, (1100, 700))  # Adjust size as needed
-except Exception as e:
-    print("Failed to load logo image:", e)
-    logo = None
-
 
 letters = []
 RADIUS = 30
@@ -114,7 +126,7 @@ def draw_button(win, x, y, letter, is_hovered):
 
 # Draw everything
 def draw():
-    win.fill(WHITE)
+    win.blit(background, (0, 0))
     title = TITLE_FONT.render(f"LEVEL {current_level}", 1, (40, 17, 7))
     win.blit(title, (WIDTH / 2 - title.get_width() / 2, 20))
 
@@ -132,6 +144,7 @@ def draw():
     # Draw it
     win.blit(word_text, word_rect)
 
+
      # Get mouse position for hover detection
     m_x, m_y = pygame.mouse.get_pos()
 
@@ -143,8 +156,8 @@ def draw():
 
 
     # Draw hangman
-    win.blit(images[hangman_status], (1000, 100))
-    
+    win.blit(images[hangman_status], (150, 100))
+
     if logo:
         win.blit(logo, (350, 20))  # Adjust (x, y) position as needed
 
@@ -180,39 +193,51 @@ def draw():
 
 # Words and hints
 level_words = {
-    1: ["CAT", "DOG", "CAR", "TREE"],
-    2: ["PYTHON", "ROCKET", "PLANET", "MOUSE"],
-    3: ["ELEPHANT", "NOTEBOOK", "PYRAMID", "GIRAFFE"],
-    4: ["ASTRONOMER", "BACKPACKING", "CONTROLLER"],
-    5: ["INCONCEIVABLE", "MICROPROCESSOR", "EXTRAORDINARY"]
+    1: ["LOOP", "MAC", "JAVA", "UNO", "CPU", "BIT", "DFA", "NFA"],
+    2: ["PYTHON", "DATABASE", "AUTOMATA", "BINARY", "TEKTOKS"],
+    3: ["ALGORITHM", "KEYBOARD", "FUNCTION", "VARIABLE", "HASH TABLE"],
+    4: ["ALEX EALA", "DEBUGGING", "SIR RYAN", "INDUSTRY", "SABESHII", "CHICKEN JOCKEY"],
+    5: ["ENCAPSULATION", "MICROPROCESSOR", "MULTITHREADING","SYNCHRONIZATION","LINKED LIST", "OPERATING SYSTEM"]
 }
 
 level_hints = {
-    "CAT": "A small pet animal.",
-    "DOG": "Man's best friend.",
-    "CAR": "A vehicle with four wheels.",
-    "TREE": "A tall plant with branches and leaves.",
-    "PYTHON": "A popular programming language.",
-    "ROCKET": "A vehicle used for space travel.",
-    "PLANET": "A large celestial body orbiting a star.",
-    "MOUSE": "A small rodent or a computer device.",
-    "ELEPHANT": "A large mammal with a trunk.",
-    "NOTEBOOK": "A type of portable computer.",
-    "PYRAMID": "A triangular-shaped structure, often seen in Egypt.",
-    "GIRAFFE": "A tall animal with a long neck.",
-    "ASTRONOMER": "A scientist who studies the stars.",
-    "BACKPACKING": "Traveling with a backpack, often hiking.",
-    "CONTROLLER": "A device used to control something, like a game console.",
-    "INCONCEIVABLE": "Something unimaginable or unbelievable.",
-    "MICROPROCESSOR": "The brain of a computer, which executes instructions.",
-    "EXTRAORDINARY": "Something very unusual or remarkable."
+    "CPU":"The brain of the computer",
+    "BIT":"Smallest data unit",
+    "DFA":"Department of Foreign Affairs",
+    "NFA":"Nondeterministic Foreign Affairs",
+    "LOOP": "Repeats code",
+    "MAC": "Hindi Bintana",
+    "JAVA": "Rice, Minecraft",
+    "UNO": "Favorite grade",
+    "PYTHON": "Snake",
+    "DATABASE": "Organized data storage tool",
+    "AUTOMATA": "Machine that works alone",
+    "BINARY": "1 or 0",
+    "ALGORITHM": "Steps to solve a problem",
+    "KEYBOARD": "Ginagamit ng mga online warriors",
+    "FUNCTION": "Group of code that runs",
+    "VARIABLE": "x, y, z, i",
+    "ALEX EALA": "Tennis Player",
+    "SABESHII" : "Favorite word sa CMSC 106",
+    "TEKTOKS":"Byte-sized buzz, inspiring breakthroughs",
+    "DEBUGGING": "Using Pesticides in code",
+    "SIR RYAN": "Best Prof",
+    "INDUSTRY":"The industry",
+    "CHICKEN JOCKEY":"I AM STEVE",
+    "HASH TABLE":"Last topic sa CMSC 123 - A of Batch 2023",
+    "ENCAPSULATION": "Hides data in code",
+    "MULTITHREADING": "Many tasks at once",
+    "SYNCHRONIZATION": "Manages timing between threads",
+    "OPERATING SYSTEM": "The conductor of digital harmony",
+    "MICROPROCESSOR": "Small chip that runs computer",
+    "LINKED LIST": "Nodes connected one by one",
 }
 
 
 # Show a message (win/lose)
 def display_message(message):
     pygame.time.delay(1000)
-    win.fill(WHITE)
+    win.blit(background, (0, 0))
     
     text = WORD_FONT.render(message, 1, (40, 17, 7))
     center_rect = pygame.Rect(0, 0, WIDTH, HEIGHT)
@@ -227,11 +252,18 @@ def draw_centered_text(text_surf, rect, y_offset=5):
     win.blit(text_surf, text_rect)
 
 def draw_menu():
-    win.fill(WHITE)
+    win.blit(background, (0, 0))
 
-    # Title
-    title = TITLE_FONT.render("HANGABUBU", True, (40, 17, 7))
-    win.blit(title, (WIDTH / 2 - title.get_width() / 2, 180))  # lowered title
+    logo_image = pygame.image.load("logo.png")
+    logo_ratio = logo_image.get_width() / logo_image.get_height()
+    new_height = 250  # fit within screen height
+    new_width = int(new_height * logo_ratio)
+    logo_image = pygame.transform.scale(logo_image, (new_width, new_height))
+
+    # Center the logo horizontally
+    logo_x = (WIDTH - logo_image.get_width()) // 2
+    logo_y = 50  # vertical offset from top
+    win.blit(logo_image, (logo_x, logo_y))
 
     # Get mouse position
     mouse_pos = pygame.mouse.get_pos()
@@ -378,22 +410,37 @@ def main():
                         guessed.append(ltr)
                         if ltr not in word:
                             hangman_status += 1
+                            wrong_sound.play()
+                        if ltr in word:
+                            correct_sound.play()
 
         # Check for win
         if all(l in guessed or l == " " for l in word):
-            pygame.time.delay(500)  # prevents double-click skipping
+        # Show full word briefly before proceeding
+            guessed = list(set(guessed + [l for l in word]))  # Ensure full word is shown
+            draw()  # Redraw screen with the full word visible
+            pygame.display.update()
+            pygame.time.delay(1500)  # Wait 1.5 seconds
+
+    # Proceed to next level or end game
             if current_level < max_level:
-                display_message(f"You WON Level {current_level}!")
+                display_message(f"The word was {word}!")
+                display_message("Next Level")
                 current_level += 1
             else:
+                display_message(f"The word was {word}!")
                 display_message("🎉 You beat all levels!")
                 current_level = 1
+                show_start_screen()
+                return
             pygame.event.clear()
             return
 
         # Check for loss
         if hangman_status == 6:
-            display_message(f"You LOST! The word was: {word}")
+            pygame.mixer.music.stop()  # Stop the background music
+            lose_sound.play()
+            display_message(f"You died! The word was: {word}")
             current_level = 1
             show_start_screen()
             return
