@@ -17,8 +17,9 @@ GREY = (200, 200, 200)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 
-# Fonts
-font_path = 'C:\\Users\\DELL\\Downloads\\HANGMANpygame\\LuckiestGuy-Regular.ttf'
+# FontsC:\Users\bddel\Documents\GitHub\Hangabubu\main.py
+font_path = r'C:\Users\DELL\Downloads\Hangabubu-main\LuckiestGuy-Regular.ttf'
+#Kamo lay adjust ani guys hahahaha
 
 LETTER_FONT = pygame.font.Font(font_path, 40)
 WORD_FONT = pygame.font.Font(font_path, 60)
@@ -32,6 +33,7 @@ pygame.mixer.music.play(-1)
 
 
 # Load sound effects
+
 correct_sound = pygame.mixer.Sound("correct.mp3")
 wrong_sound = pygame.mixer.Sound("wrong.mp3")
 lose_sound = pygame.mixer.Sound("lose.mp3")
@@ -52,6 +54,13 @@ except:
     background = pygame.Surface((WIDTH, HEIGHT))
     background.fill(WHITE)
 
+# The hanging noose
+try:
+    logo = pygame.image.load("Noose.png").convert_alpha()
+    logo = pygame.transform.scale(logo, (1100, 700))  # Adjust size as needed
+except Exception as e:
+    print("Failed to load logo image:", e)
+    logo = None
 
 
 # Hangman images
@@ -130,11 +139,10 @@ def draw():
     word_text = WORD_FONT.render(display_word.strip(), True, (40, 17, 7))  
 
     # Center the text horizontally at y=600 (you can adjust y as needed)
-    word_rect = word_text.get_rect(center=(1280 // 2, 400)) 
+    word_rect = word_text.get_rect(midleft=(140, 320))
 
     # Draw it
     win.blit(word_text, word_rect)
-
 
 
      # Get mouse position for hover detection
@@ -150,12 +158,17 @@ def draw():
     # Draw hangman
     win.blit(images[hangman_status], (150, 100))
 
+    if logo:
+        win.blit(logo, (350, 20))  # Adjust (x, y) position as needed
+
+
     # Draw hint
     hint_text = HINT_FONT.render(f"Hint: {hint}", 1, (40, 17, 7))
-    win.blit(hint_text, (WIDTH / 2 - hint_text.get_width() / 2, HEIGHT / 2 + 100))
+    hint_rect = hint_text.get_rect(midleft=(140, 380))  # Adjust y (500) as needed for spacing
+    win.blit(hint_text, hint_rect)
 
     # Another window from 'Menu' Top-Right
-    menu_x, menu_y = 1000, 30  # example position
+    menu_x, menu_y = 50, 30  # example position
     menu_width, menu_height = 200, 60  # example size
 
     menu_button_rect = pygame.Rect(menu_x, menu_y, menu_width, menu_height)
@@ -181,14 +194,18 @@ def draw():
 
 # Words and hints
 level_words = {
-    1: ["LOOP", "MAC", "JAVA", "UNO"],
-    2: ["PYTHON", "DATABASE", "AUTOMATA", "BINARY"],
-    3: ["ALGORITHM", "KEYBOARD", "FUNCTION", "VARIABLE"],
-    4: ["ALEX EALA", "DEBUGGING", "SIR RYAN"],
-    5: ["ENCAPSULATION", "MICROPROCESSOR", "LINKEDLIST"]
+    1: ["LOOP", "MAC", "JAVA", "UNO", "CPU", "BIT", "DFA", "NFA"],
+    2: ["PYTHON", "DATABASE", "AUTOMATA", "BINARY", "TEKTOKS"],
+    3: ["ALGORITHM", "KEYBOARD", "FUNCTION", "VARIABLE", "HASH TABLE"],
+    4: ["ALEX EALA", "DEBUGGING", "SIR RYAN", "INDUSTRY", "SABESHII", "CHICKEN JOCKEY"],
+    5: ["ENCAPSULATION", "MICROPROCESSOR", "MULTITHREADING","SYNCHRONIZATION","LINKED LIST", "OPERATING SYSTEM"]
 }
 
 level_hints = {
+    "CPU":"The brain of the computer",
+    "BIT":"Smallest data unit",
+    "DFA":"Department of Foreign Affairs",
+    "NFA":"Nondeterministic Foreign Affairs",
     "LOOP": "Repeats code",
     "MAC": "Hindi Bintana",
     "JAVA": "Rice, Minecraft",
@@ -202,9 +219,17 @@ level_hints = {
     "FUNCTION": "Group of code that runs",
     "VARIABLE": "x, y, z, i",
     "ALEX EALA": "Tennis Player",
+    "SABESHII" : "Favorite word sa CMSC 106",
+    "TEKTOKS":"Byte-sized buzz, inspiring breakthroughs",
     "DEBUGGING": "Using Pesticides in code",
     "SIR RYAN": "Best Prof",
+    "INDUSTRY":"The industry",
+    "CHICKEN JOCKEY":"I AM STEVE",
+    "HASH TABLE":"Last topic sa CMSC 123 - A of Batch 2024",
     "ENCAPSULATION": "Hides data in code",
+    "MULTITHREADING": "Many tasks at once",
+    "SYNCHRONIZATION": "Manages timing between threads",
+    "OPERATING SYSTEM": "The conductor of digital harmony",
     "MICROPROCESSOR": "Small chip that runs computer",
     "LINKED LIST": "Nodes connected one by one",
 }
@@ -392,13 +417,23 @@ def main():
 
         # Check for win
         if all(l in guessed or l == " " for l in word):
-            pygame.time.delay(500)  # prevents double-click skipping
+        # Show full word briefly before proceeding
+            guessed = list(set(guessed + [l for l in word]))  # Ensure full word is shown
+            draw()  # Redraw screen with the full word visible
+            pygame.display.update()
+            pygame.time.delay(1500)  # Wait 1.5 seconds
+
+    # Proceed to next level or end game
             if current_level < max_level:
-                display_message(f"You WON Level {current_level}!")
+                display_message(f"The word was {word}!")
+                display_message("Next Level")
                 current_level += 1
             else:
+                display_message(f"The word was {word}!")
                 display_message("🎉 You beat all levels!")
                 current_level = 1
+                show_start_screen()
+                return
             pygame.event.clear()
             return
 
@@ -406,7 +441,7 @@ def main():
         if hangman_status == 6:
             pygame.mixer.music.stop()  # Stop the background music
             lose_sound.play()
-            display_message(f"You LOST! The word was: {word}")
+            display_message(f"You died! The word was: {word}")
             current_level = 1
             show_start_screen()
             return
