@@ -17,8 +17,9 @@ GREY = (200, 200, 200)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 
-# Fonts
-font_path = 'C:\\Users\\DELL\\Downloads\\HANGMANpygame\\LuckiestGuy-Regular.ttf'
+# FontsC:\Users\bddel\Documents\GitHub\Hangabubu\main.py
+font_path = 'C:\\Users\\bddel\\Documents\\Github\\Hangabubu\\LuckiestGuy-Regular.ttf'
+#Kamo lay adjust ani guys hahahaha
 
 LETTER_FONT = pygame.font.Font(font_path, 40)
 WORD_FONT = pygame.font.Font(font_path, 60)
@@ -32,6 +33,8 @@ pygame.mixer.music.play(-1)
 
 
 # Load sound effects
+win1_sound = pygame.mixer.Sound("win1.mp3")
+win2_sound = pygame.mixer.Sound("win2.mp3")
 correct_sound = pygame.mixer.Sound("correct.mp3")
 wrong_sound = pygame.mixer.Sound("wrong.mp3")
 lose_sound = pygame.mixer.Sound("lose.mp3")
@@ -181,14 +184,18 @@ def draw():
 
 # Words and hints
 level_words = {
-    1: ["LOOP", "MAC", "JAVA", "UNO"],
-    2: ["PYTHON", "DATABASE", "AUTOMATA", "BINARY"],
-    3: ["ALGORITHM", "KEYBOARD", "FUNCTION", "VARIABLE"],
-    4: ["ALEX EALA", "DEBUGGING", "SIR RYAN"],
-    5: ["ENCAPSULATION", "MICROPROCESSOR", "LINKEDLIST"]
+    1: ["LOOP", "MAC", "JAVA", "UNO", "CPU", "BIT", "DFA", "NFA"],
+    2: ["PYTHON", "DATABASE", "AUTOMATA", "BINARY", "TEKTOKS"],
+    3: ["ALGORITHM", "KEYBOARD", "FUNCTION", "VARIABLE", "HASH TABLE"],
+    4: ["ALEX EALA", "DEBUGGING", "SIR RYAN", "INDUSTRY", "SABESHII", "CHICKEN JOCKEY"],
+    5: ["ENCAPSULATION", "MICROPROCESSOR", "MULTITHREADING","SYNCHRONIZATION","LINKED LIST", "OPERATING SYSTEM"]
 }
 
 level_hints = {
+    "CPU":"The brain of the computer",
+    "BIT":"Smallest data unit",
+    "DFA":"Department of Foreign Affairs",
+    "NFA":"Nondeterministic Foreign Affairs",
     "LOOP": "Repeats code",
     "MAC": "Hindi Bintana",
     "JAVA": "Rice, Minecraft",
@@ -202,9 +209,17 @@ level_hints = {
     "FUNCTION": "Group of code that runs",
     "VARIABLE": "x, y, z, i",
     "ALEX EALA": "Tennis Player",
+    "SABESHII" : "Favorite word sa CMSC 106",
+    "TEKTOKS":"Byte-sized buzz, inspiring breakthroughs",
     "DEBUGGING": "Using Pesticides in code",
     "SIR RYAN": "Best Prof",
+    "INDUSTRY":"The industry",
+    "CHICKEN JOCKEY":"I AM STEVE",
+    "HASH TABLE":"Last topic sa CMSC 123 - A of Batch 2023",
     "ENCAPSULATION": "Hides data in code",
+    "MULTITHREADING": "Many tasks at once",
+    "SYNCHRONIZATION": "Manages timing between threads",
+    "OPERATING SYSTEM": "The conductor of digital harmony",
     "MICROPROCESSOR": "Small chip that runs computer",
     "LINKED LIST": "Nodes connected one by one",
 }
@@ -392,13 +407,17 @@ def main():
 
         # Check for win
         if all(l in guessed or l == " " for l in word):
-            pygame.time.delay(500)  # prevents double-click skipping
+          # prevents double-click skipping
             if current_level < max_level:
-                display_message(f"You WON Level {current_level}!")
+                display_message(f"The word was {word}!")
+                display_message("Next Level")
                 current_level += 1
             else:
+                display_message(f"The word was {word}!")
                 display_message("🎉 You beat all levels!")
                 current_level = 1
+                show_start_screen()
+                return
             pygame.event.clear()
             return
 
@@ -406,7 +425,7 @@ def main():
         if hangman_status == 6:
             pygame.mixer.music.stop()  # Stop the background music
             lose_sound.play()
-            display_message(f"You LOST! The word was: {word}")
+            display_message(f"You died! The word was: {word}")
             current_level = 1
             show_start_screen()
             return
