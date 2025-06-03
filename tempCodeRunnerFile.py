@@ -225,10 +225,10 @@ def draw():
     current_frame = animations[hangman_status][frame_indices[hangman_status]]
     
     # Position the animation (adjust to your UI)
-    pos = (770, 270)
+    pos = (770, 205)
 
     win.blit(current_frame, pos)
-    draw_hangman_status(win, hangman_status, noose_images, position=(715, 40))
+    draw_hangman_status(win, hangman_status, noose_images, position=(715, -30))
 
 
 
