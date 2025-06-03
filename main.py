@@ -18,6 +18,8 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 
 # FontsC:\Users\bddel\Documents\GitHub\Hangabubu\main.py
+
+# font_path = r'C:\Users\DELL\Downloads\Hangabubu-main\LuckiestGuy-Regular.ttf'
 font_path = 'C:\\Users\\bddel\\Documents\\Github\\Hangabubu\\LuckiestGuy-Regular.ttf'
 #Kamo lay adjust ani guys hahahaha
 
@@ -54,6 +56,13 @@ except:
     background = pygame.Surface((WIDTH, HEIGHT))
     background.fill(WHITE)
 
+# The hanging noose
+try:
+    logo = pygame.image.load("Noose.png").convert_alpha()
+    logo = pygame.transform.scale(logo, (1100, 700))  # Adjust size as needed
+except Exception as e:
+    print("Failed to load logo image:", e)
+    logo = None
 
 
 # Hangman images
@@ -132,11 +141,10 @@ def draw():
     word_text = WORD_FONT.render(display_word.strip(), True, (40, 17, 7))  
 
     # Center the text horizontally at y=600 (you can adjust y as needed)
-    word_rect = word_text.get_rect(center=(1280 // 2, 400)) 
+    word_rect = word_text.get_rect(midleft=(140, 320))
 
     # Draw it
     win.blit(word_text, word_rect)
-
 
 
      # Get mouse position for hover detection
@@ -152,12 +160,17 @@ def draw():
     # Draw hangman
     win.blit(images[hangman_status], (150, 100))
 
+    if logo:
+        win.blit(logo, (350, 20))  # Adjust (x, y) position as needed
+
+
     # Draw hint
     hint_text = HINT_FONT.render(f"Hint: {hint}", 1, (40, 17, 7))
-    win.blit(hint_text, (WIDTH / 2 - hint_text.get_width() / 2, HEIGHT / 2 + 100))
+    hint_rect = hint_text.get_rect(midleft=(140, 380))  # Adjust y (500) as needed for spacing
+    win.blit(hint_text, hint_rect)
 
     # Another window from 'Menu' Top-Right
-    menu_x, menu_y = 1000, 30  # example position
+    menu_x, menu_y = 50, 30  # example position
     menu_width, menu_height = 200, 60  # example size
 
     menu_button_rect = pygame.Rect(menu_x, menu_y, menu_width, menu_height)
@@ -214,7 +227,7 @@ level_hints = {
     "SIR RYAN": "Best Prof",
     "INDUSTRY":"The industry",
     "CHICKEN JOCKEY":"I AM STEVE",
-    "HASH TABLE":"Last topic sa CMSC 123 - A of Batch 2023",
+    "HASH TABLE":"Last topic sa CMSC 123 - A of Batch 2024",
     "ENCAPSULATION": "Hides data in code",
     "MULTITHREADING": "Many tasks at once",
     "SYNCHRONIZATION": "Manages timing between threads",
