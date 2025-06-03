@@ -1,6 +1,7 @@
 import pygame
 import math
 import random
+import os
 from Animation import create_sprite_animation
 # Initialize Pygame and set up display
 pygame.init()
@@ -20,7 +21,7 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLACK = (0,0,0)
 # FontsC:\Users\bddel\Documents\GitHub\Hangabubu\main.py
-font_path = 'C:\\Users\\bddel\\Documents\\Github\\Hangabubu\\LuckiestGuy-Regular.ttf'
+font_path = r'C:\Users\DELL\Downloads\Hangabubu-main\LuckiestGuy-Regular.ttf'
 #Kamo lay adjust ani guys hahahaha
 
 LETTER_FONT = pygame.font.Font(font_path, 40)
@@ -28,24 +29,31 @@ WORD_FONT = pygame.font.Font(font_path, 60)
 TITLE_FONT = pygame.font.Font(font_path, 100)
 HINT_FONT = pygame.font.Font(font_path, 30)  # Smaller size
 
+
+# initialize pygame mixer
+pygame.init()
+pygame.mixer.init()
+sound_folder = os.path.join(os.path.dirname(__file__), "sound")
+
 # Load and play background music
-pygame.mixer.music.load("background_music.mp3")
+pygame.mixer.music.load(os.path.join(sound_folder, "background_music.mp3"))
 pygame.mixer.music.set_volume(0.3)
 pygame.mixer.music.play(-1)
 
-
 # Load sound effects
+correct_sound = pygame.mixer.Sound(os.path.join(sound_folder, "correct.mp3"))
+wrong_sound = pygame.mixer.Sound(os.path.join(sound_folder, "wrong.mp3"))
+lose_sound = pygame.mixer.Sound(os.path.join(sound_folder, "lose.mp3"))
 
-correct_sound = pygame.mixer.Sound("correct.mp3")
-wrong_sound = pygame.mixer.Sound("wrong.mp3")
-lose_sound = pygame.mixer.Sound("lose.mp3")
 
+rope_folder = os.path.join(os.path.dirname(__file__), "hangbubu_rope")
 
 noose_images = []
-for i in range(1,7):  # Assuming 7 stages of hangman
-    image_path = f"hangabubu_ropesprite_0{i}.png"
+for i in range(1, 6):  # Assuming 5 stages of hangman
+    image_filename = f"hangabubu_ropesprite_0{i}.png"
+    image_path = os.path.join(rope_folder, image_filename)
     image = pygame.image.load(image_path).convert_alpha()
-    image = pygame.transform.scale(image, (375,600))  # Optional scaling
+    image = pygame.transform.scale(image, (375, 600))  # Optional scaling
     noose_images.append(image)
 
 # Game variables
@@ -243,6 +251,7 @@ level_words = {
     3: ["ALGORITHM", "KEYBOARD", "FUNCTION", "VARIABLE", "HASH TABLE"],
     4: ["ALEX EALA", "DEBUGGING", "SIR RYAN", "INDUSTRY", "SABESHII", "CHICKEN JOCKEY"],
     5: ["ENCAPSULATION", "MICROPROCESSOR", "MULTITHREADING","SYNCHRONIZATION","LINKED LIST", "OPERATING SYSTEM"]
+
 }
 
 level_hints = {
