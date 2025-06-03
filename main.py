@@ -1,7 +1,8 @@
 import pygame
 import math
 import random
-import os
+import os 
+
 from Animation import create_sprite_animation
 # Initialize Pygame and set up display
 pygame.init()
@@ -21,14 +22,14 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLACK = (0,0,0)
 # FontsC:\Users\bddel\Documents\GitHub\Hangabubu\main.py
-font_path = r'C:\\Users\bddel\Documents\Github\Hangabubu\LuckiestGuy-Regular.ttf'
+# font_path = r'C:\Users\DELL\Downloads\Hangabubu-main\LuckiestGuy-Regular.ttf'
+font_path = r'C:\Users\bddel\Documents\GitHub\Hangabubu\LuckiestGuy-Regular.ttf'
 #Kamo lay adjust ani guys hahahaha
 
 LETTER_FONT = pygame.font.Font(font_path, 40)
 WORD_FONT = pygame.font.Font(font_path, 60)
 TITLE_FONT = pygame.font.Font(font_path, 100)
 HINT_FONT = pygame.font.Font(font_path, 30)  # Smaller size
-
 
 # initialize pygame mixer
 pygame.init()
@@ -78,14 +79,17 @@ except Exception as e:
     print("Failed to load logo image:", e)
     logo = None
 
+# define the path to the sprites folder
+sprites_folder = os.path.join(os.path.dirname(__file__), "hangabubu_sprites")
+
 animation_data = [
-    ("hangabubu_idle_spritesheet.png", 200, 200, 11, 75),
-    ("hangabubu_nervous_spritesheet.png", 200, 200, 11, 75),
-    ("hangabubu_nervous_spritesheet.png", 200, 200, 11, 30),
-    ("hangabubu_scared.png", 200, 200, 2, 70),
-    ("hangabubu_neardeath_spritesheet.png", 200, 200, 2, 20),
-    ("hangabubu_dead_spritesheet.png", 200, 200, 7, 50),
-    ]
+    (os.path.join(sprites_folder, "hangabubu_idle_spritesheet.png"), 200, 200, 11, 75),
+    (os.path.join(sprites_folder, "hangabubu_nervous_spritesheet.png"), 200, 200, 11, 75),
+    (os.path.join(sprites_folder, "hangabubu_nervous_spritesheet.png"), 200, 200, 11, 30),
+    (os.path.join(sprites_folder, "hangabubu_scared.png"), 200, 200, 2, 70),
+    (os.path.join(sprites_folder, "hangabubu_neardeath_spritesheet.png"), 200, 200, 2, 20),
+    (os.path.join(sprites_folder, "hangabubu_dead_spritesheet.png"), 200, 200, 7, 50),
+]
 
 desired_width = 250
 desired_height = 250
@@ -178,7 +182,7 @@ def draw():
     word_text = WORD_FONT.render(display_word.strip(), True, (40, 17, 7))  
 
     # Center the text horizontally at y=600 (you can adjust y as needed)
-    word_rect = word_text.get_rect(center=(1280 // 2, 400)) 
+    word_rect = word_text.get_rect(midleft=(140, 320)) 
 
     # Draw it
     win.blit(word_text, word_rect)
@@ -199,7 +203,8 @@ def draw():
 
     # Draw hint
     hint_text = HINT_FONT.render(f"Hint: {hint}", 1, (40, 17, 7))
-    win.blit(hint_text, (WIDTH / 2 - hint_text.get_width() / 2, HEIGHT / 2 + 100))
+    hint_rect = hint_text.get_rect(midleft=(140,380)) #Adjust the y coordinates of the hints
+    win.blit(hint_text, hint_rect)
 
     # Another window from 'Menu' Top-Right
     menu_x, menu_y = 50, 30  # example position
@@ -232,10 +237,10 @@ def draw():
     current_frame = animations[hangman_status][frame_indices[hangman_status]]
     
     # Position the animation (adjust to your UI)
-    pos = (770, 270)
+    pos = (770, 205)
 
     win.blit(current_frame, pos)
-    draw_hangman_status(win, hangman_status, noose_images, position=(715, 40))
+    draw_hangman_status(win, hangman_status, noose_images, position=(715, -30))
 
 
 
@@ -248,10 +253,9 @@ def draw():
 level_words = {
     1: ["LOOP", "MAC", "JAVA", "UNO", "CPU", "BIT", "DFA", "NFA"],
     2: ["PYTHON", "DATABASE", "AUTOMATA", "BINARY", "TEKTOKS"],
-    3: ["ALGORITHM", "KEYBOARD", "FUNCTION", "VARIABLE", "HASH TABLE"],
+    3: ["ALGORITHM", "KEYBOARD", "FUNCTION", "VARIABLE", "HASH TABLE", "TO MAKE SIR LAO HAPPY"],
     4: ["ALEX EALA", "DEBUGGING", "SIR RYAN", "INDUSTRY", "SABESHII", "CHICKEN JOCKEY"],
     5: ["ENCAPSULATION", "MICROPROCESSOR", "MULTITHREADING","SYNCHRONIZATION","LINKED LIST", "OPERATING SYSTEM"]
-
 }
 
 level_hints = {
@@ -275,7 +279,7 @@ level_hints = {
     "SABESHII" : "Favorite word sa CMSC 106",
     "TEKTOKS":"Byte-sized buzz, inspiring breakthroughs",
     "DEBUGGING": "Using Pesticides in code",
-    "SIR RYAN": "Best Prof",
+    "SIR RYAN": "Best and Goated Prof",
     "INDUSTRY":"The industry",
     "CHICKEN JOCKEY":"I AM STEVE",
     "HASH TABLE":"Last topic sa CMSC 123 - A of Batch 2023",
@@ -285,6 +289,7 @@ level_hints = {
     "OPERATING SYSTEM": "The conductor of digital harmony",
     "MICROPROCESSOR": "Small chip that runs computer",
     "LINKED LIST": "Nodes connected one by one",
+    "TO MAKE SIR LAO HAPPY": "Why do we do review in related literature"
 }
 
 

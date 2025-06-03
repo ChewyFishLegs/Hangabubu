@@ -2,8 +2,8 @@ import pygame
 import math
 import random
 import os 
+import Animation
 
-from Animation import create_sprite_animation
 # Initialize Pygame and set up display
 pygame.init()
 
@@ -11,7 +11,8 @@ pygame.init()
 WIDTH, HEIGHT = 1280, 720
 win = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Hangman Game!")
-
+last_press_correct = None  # None = no recent press, True = last correct, False = last incorrect
+last_press_time = None
 # Constants
 RADIUS = 30
 GAP = 20
@@ -21,9 +22,23 @@ GREY = (200, 200, 200)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLACK = (0,0,0)
+
+bubble_animation_list = []
+bubble_action = 2   # default “idle” index
+bubble_frame = 0
+bubble_last_update = 0
+bubble_cooldown = 500  # ms between bubble frames
+
 # FontsC:\Users\bddel\Documents\GitHub\Hangabubu\main.py
+# font_path = r'C:\Users\DELL\Downloads\Hangabubu-main\LuckiestGuy-Regular.ttf'
 font_path = r'C:\Users\bddel\Documents\GitHub\Hangabubu\LuckiestGuy-Regular.ttf'
 #Kamo lay adjust ani guys hahahaha
+
+
+RADIUS = 30
+GAP = 20
+FPS = 60
+WHITE = (255, 255, 255)
 
 LETTER_FONT = pygame.font.Font(font_path, 40)
 WORD_FONT = pygame.font.Font(font_path, 60)
@@ -49,7 +64,7 @@ lose_sound = pygame.mixer.Sound(os.path.join(sound_folder, "lose.mp3"))
 rope_folder = os.path.join(os.path.dirname(__file__), "hangbubu_rope")
 
 noose_images = []
-for i in range(1, 6):  # Assuming 5 stages of hangman
+for i in range(1, 7):  # Assuming 5 stages of hangman
     image_filename = f"hangabubu_ropesprite_0{i}.png"
     image_path = os.path.join(rope_folder, image_filename)
     image = pygame.image.load(image_path).convert_alpha()
@@ -81,6 +96,15 @@ except Exception as e:
 # define the path to the sprites folder
 sprites_folder = os.path.join(os.path.dirname(__file__), "hangabubu_sprites")
 
+happy_animation_text = [
+    (os.path.join(sprites_folder, "hangabubu_idle_spritesheet.png"), 200, 200, 11, 75),
+    (os.path.join(sprites_folder, "hangabubu_nervous_spritesheet.png"), 200, 200, 11, 75),
+    (os.path.join(sprites_folder, "hangabubu_nervous_spritesheet.png"), 200, 200, 11, 30),   
+]
+
+bubble_sprite_sheet_image = pygame.image.load('hangabubu_textsprites.png').convert_alpha()
+bubble_sprite_sheet = Animation.SpriteSheet(bubble_sprite_sheet_image)
+
 animation_data = [
     (os.path.join(sprites_folder, "hangabubu_idle_spritesheet.png"), 200, 200, 11, 75),
     (os.path.join(sprites_folder, "hangabubu_nervous_spritesheet.png"), 200, 200, 11, 75),
@@ -100,10 +124,28 @@ for path, fw, fh, steps, duration in animation_data:
     scale_y = desired_height / fh
     scale = min(scale_x, scale_y)
     
-    frames = create_sprite_animation(path, fw, fh, scale, steps)
+    frames = Animation.create_sprite_animation(path, fw, fh, scale, steps)
     animations.append(frames)
     frame_durations.append(duration)
 
+
+bubble_animation_list = []
+bubble_animation_steps = [2,2,2,2,2,2,2,2,2]
+step_counter = 0
+for step_count in bubble_animation_steps:
+    temp_list = []
+    for _ in range(step_count):
+        orig_bubble = bubble_sprite_sheet.get_image(step_counter, 200, 200, 3)
+        mini_bubble = pygame.transform.scale(orig_bubble, (300,300))
+        temp_list.append(mini_bubble)
+        step_counter += 1
+    bubble_animation_list.append(temp_list)
+    
+
+bubble_action = 2  # idle bubble animation index
+bubble_frame = 0
+bubble_last_update = pygame.time.get_ticks()
+bubble_cooldown = 500
 
 
 # Animation control variables
@@ -167,7 +209,7 @@ def draw_hangman_status(screen, incorrect_guesses, noose_images, position=(770, 
 
 # Draw everything
 def draw():
-    global last_update
+    global last_update, last_press_time, last_press_correct
     win.blit(background, (0, 0))
     title = TITLE_FONT.render(f"LEVEL {current_level}", 1, (40, 17, 7))
     win.blit(title, (WIDTH / 2 - title.get_width() / 2, 20))
@@ -232,9 +274,15 @@ def draw():
         frame_indices[hangman_status] = (frame_indices[hangman_status] + 1) % len(animations[hangman_status])
         last_update_times[hangman_status] = current_time
 
+    if last_press_time is not None and current_time - last_press_time > bubble_display_time:
+        last_press_correct = None
+        last_press_time = None
     # Draw current animation frame
     current_frame = animations[hangman_status][frame_indices[hangman_status]]
     
+    bubble_img = bubble_animation_list[bubble_action][bubble_frame]
+    win.blit(bubble_img, (500, 70))
+
     # Position the animation (adjust to your UI)
     pos = (770, 205)
 
@@ -252,7 +300,7 @@ def draw():
 level_words = {
     1: ["LOOP", "MAC", "JAVA", "UNO", "CPU", "BIT", "DFA", "NFA"],
     2: ["PYTHON", "DATABASE", "AUTOMATA", "BINARY", "TEKTOKS"],
-    3: ["ALGORITHM", "KEYBOARD", "FUNCTION", "VARIABLE", "HASH TABLE"],
+    3: ["ALGORITHM", "KEYBOARD", "FUNCTION", "VARIABLE", "HASH TABLE", "TO MAKE SIR LAO HAPPY"],
     4: ["ALEX EALA", "DEBUGGING", "SIR RYAN", "INDUSTRY", "SABESHII", "CHICKEN JOCKEY"],
     5: ["ENCAPSULATION", "MICROPROCESSOR", "MULTITHREADING","SYNCHRONIZATION","LINKED LIST", "OPERATING SYSTEM"]
 }
@@ -278,7 +326,7 @@ level_hints = {
     "SABESHII" : "Favorite word sa CMSC 106",
     "TEKTOKS":"Byte-sized buzz, inspiring breakthroughs",
     "DEBUGGING": "Using Pesticides in code",
-    "SIR RYAN": "Best Prof",
+    "SIR RYAN": "Best and Goated Prof",
     "INDUSTRY":"The industry",
     "CHICKEN JOCKEY":"I AM STEVE",
     "HASH TABLE":"Last topic sa CMSC 123 - A of Batch 2023",
@@ -288,8 +336,11 @@ level_hints = {
     "OPERATING SYSTEM": "The conductor of digital harmony",
     "MICROPROCESSOR": "Small chip that runs computer",
     "LINKED LIST": "Nodes connected one by one",
+    "TO MAKE SIR LAO HAPPY": "Why do we do review in related literature"
 }
-
+last_press_correct = None
+last_press_time = None
+bubble_display_time = 1500
 
 # Show a message (win/lose)
 def display_message(message):
@@ -356,6 +407,7 @@ def draw_menu():
 
 
 def show_start_screen():
+    pygame.mixer.music.play()
     while True:
         play_rect, exit_rect = draw_menu()
         for event in pygame.event.get():
@@ -426,21 +478,42 @@ def confirm_menu_return():
 # Main game loop
 def main():
     global hangman_status, guessed, word, hint, current_level
+    global last_press_time, last_press_correct
+    global bubble_action, bubble_frame, bubble_last_update
 
+    # Initialize/reset game state for this level
     hangman_status = 0
     guessed = []
     word = random.choice(level_words[current_level]).upper()
     hint = level_hints.get(word, "No hint available")
 
-    # Reset letters
+    # Reset bubble state
+    last_press_time = None
+    last_press_correct = None
+    bubble_action = 2  # idle
+    bubble_frame = 0
+    bubble_last_update = pygame.time.get_ticks()
+
+    # Reset letter buttons to “visible”
     for letter in letters:
         letter[3] = True
+
     clock = pygame.time.Clock()
     run = True
 
     while run:
         clock.tick(FPS)
         menu_button_rect = draw()
+
+        current_time = pygame.time.get_ticks()
+
+        # Handle bubble animation timing
+        
+
+        if last_press_correct is not None:
+            if current_time - bubble_last_update >= bubble_cooldown:
+                bubble_frame = (bubble_frame + 1) % len(bubble_animation_list[bubble_action])
+                bubble_last_update = current_time
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -450,27 +523,46 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 m_x, m_y = pygame.mouse.get_pos()
 
-                # Handle menu button click
+                # Check if Menu button clicked
                 if menu_button_rect.collidepoint((m_x, m_y)):
                     if confirm_menu_return():
                         current_level = 1
                         show_start_screen()
                         return
-                    continue  # Skip checking letters if menu was clicked
+                    continue
 
-                # Handle letter button clicks
+                # Check letter buttons
                 for letter in letters:
                     x, y, ltr, visible = letter
-                    if visible and math.hypot(x - m_x, y - m_y) < RADIUS:
-                        letter[3] = False
-                        guessed.append(ltr)
-                        if ltr not in word:
-                            hangman_status += 1
-                            wrong_sound.play()
-                        if ltr in word:
-                            correct_sound.play()
+                    # Reset bubble animation timing
+                    last_press_time = pygame.time.get_ticks()
+                    bubble_frame = 0
+                    bubble_last_update = pygame.time.get_ticks()
 
-        # Check for win
+                    if visible and math.hypot(x - m_x, y - m_y) < RADIUS:
+                        letter[3] = False  # hide letter
+                        guessed.append(ltr)
+
+                        # Check if guess is correct
+                        if ltr in word:
+                            last_press_correct = True
+                            correct_sound.play()
+                            if hangman_status == 0:
+                                bubble_action = random.randint(0,2)   # happy bubble index
+                        if ltr not in word:
+                            last_press_correct = False
+                            wrong_sound.play()
+                            hangman_status += 1
+                            # If you want a special bubble when hangman_status > 4:
+                            if hangman_status > 4:
+                                bubble_action = random.randint(6,8) # “critical sad” index (adjust if you have it)
+                            elif hangman_status <= 4 or hangman_status > 0:
+                                bubble_action = random.randint(3, 5)
+                                 # normal sad index
+                        
+                        
+
+                       # Check for win
         if all(l in guessed or l == " " for l in word):
         # Show full word briefly before proceeding
             guessed = list(set(guessed + [l for l in word]))  # Ensure full word is shown
@@ -500,7 +592,7 @@ def main():
             current_level = 1
             show_start_screen()
             return
-
+        draw()
 # Game loop
 show_start_screen()
 while True:
