@@ -4,6 +4,8 @@ import random
 from Animation import create_sprite_animation
 # Initialize Pygame and set up display
 pygame.init()
+
+
 WIDTH, HEIGHT = 1280, 720
 win = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Hangman Game!")
@@ -39,6 +41,12 @@ wrong_sound = pygame.mixer.Sound("wrong.mp3")
 lose_sound = pygame.mixer.Sound("lose.mp3")
 
 
+noose_images = []
+for i in range(1,7):  # Assuming 7 stages of hangman
+    image_path = f"hangabubu_ropesprite_0{i}.png"
+    image = pygame.image.load(image_path).convert_alpha()
+    image = pygame.transform.scale(image, (375,600))  # Optional scaling
+    noose_images.append(image)
 
 # Game variables
 hangman_status = 0
@@ -63,31 +71,33 @@ except Exception as e:
     logo = None
 
 animation_data = [
-    ("hangabubu_idle_spritesheet3.png", 98, 98, 11),
-    ("hangabubu_nervous_spritesheet.png", 98, 98, 11),
-    ("hangabubu_nervous_spritesheet.png", 98, 98, 11),
-    ("hangabubu_scared.png", 200, 200, 2),
-    ("hangabubu_scared.png", 200, 200, 2),
-    ("hangabubu_scared.png", 200, 200, 2),
+    ("hangabubu_idle_spritesheet.png", 200, 200, 11, 75),
+    ("hangabubu_nervous_spritesheet.png", 200, 200, 11, 75),
+    ("hangabubu_nervous_spritesheet.png", 200, 200, 11, 30),
+    ("hangabubu_scared.png", 200, 200, 2, 70),
+    ("hangabubu_neardeath_spritesheet.png", 200, 200, 2, 20),
+    ("hangabubu_dead_spritesheet.png", 200, 200, 7, 50),
     ]
 
 desired_width = 250
 desired_height = 250
 
 animations = []
-for path, fw, fh, steps in animation_data:
+frame_durations = []
+for path, fw, fh, steps, duration in animation_data:
     scale_x = desired_width / fw
     scale_y = desired_height / fh
-    # if you want to preserve aspect ratio, use min(scale_x, scale_y)
     scale = min(scale_x, scale_y)
     
-    frames = create_sprite_animation(path, fw, fh, scale, steps, BLACK)
+    frames = create_sprite_animation(path, fw, fh, scale, steps)
     animations.append(frames)
+    frame_durations.append(duration)
+
+
 
 # Animation control variables
 frame_indices = [0] * len(animations)  # current frame per animation
-animation_cooldown = 100  # ms between frames, adjust as needed
-last_update = pygame.time.get_ticks()
+last_update_times = [pygame.time.get_ticks()] * len(animations)
 
 letters = []
 RADIUS = 30
@@ -138,7 +148,11 @@ def draw_button(win, x, y, letter, is_hovered):
     text = LETTER_FONT.render(letter, True, (40, 17, 7))
     draw_centered_text(text, button_rect)
 
-
+def draw_hangman_status(screen, incorrect_guesses, noose_images, position=(770, 270)):
+    if incorrect_guesses == 0:
+        return
+    index = min(incorrect_guesses - 1, len(noose_images) - 1)
+    screen.blit(noose_images[index], position)
 
 # Draw everything
 def draw():
@@ -172,7 +186,7 @@ def draw():
             draw_button(win, x, y, ltr, is_hovered)
 
     if logo:
-        win.blit(logo, (350, 20))  # Adjust (x, y) position as needed
+        win.blit(logo, (350, 10))  # Adjust (x, y) position as needed
 
 
     # Draw hint
@@ -201,18 +215,20 @@ def draw():
     
     # Update animation frame timing
     current_time = pygame.time.get_ticks()
-    if current_time - last_update >= animation_cooldown:
-        # advance current animation frame
+    cooldown = frame_durations[hangman_status]
+    if current_time - last_update_times[hangman_status] >= cooldown:
         frame_indices[hangman_status] = (frame_indices[hangman_status] + 1) % len(animations[hangman_status])
-        last_update = current_time
+        last_update_times[hangman_status] = current_time
 
     # Draw current animation frame
     current_frame = animations[hangman_status][frame_indices[hangman_status]]
     
     # Position the animation (adjust to your UI)
-    pos = (790, 300)
+    pos = (770, 270)
 
     win.blit(current_frame, pos)
+    draw_hangman_status(win, hangman_status, noose_images, position=(715, 40))
+
 
 
     pygame.display.update()
