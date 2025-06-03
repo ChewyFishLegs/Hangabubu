@@ -1,7 +1,7 @@
 import pygame
 import math
 import random
-
+from Animation import create_sprite_animation
 # Initialize Pygame and set up display
 pygame.init()
 WIDTH, HEIGHT = 1280, 720
@@ -16,7 +16,7 @@ WHITE = (255, 255, 255)
 GREY = (200, 200, 200)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
-
+BLACK = (0,0,0)
 # FontsC:\Users\bddel\Documents\GitHub\Hangabubu\main.py
 
 # font_path = r'C:\Users\DELL\Downloads\Hangabubu-main\LuckiestGuy-Regular.ttf'
@@ -64,16 +64,32 @@ except Exception as e:
     print("Failed to load logo image:", e)
     logo = None
 
+animation_data = [
+    ("hangabubu_idle_spritesheet3.png", 98, 98, 11),
+    ("hangabubu_nervous_spritesheet.png", 98, 98, 11),
+    ("hangabubu_nervous_spritesheet.png", 98, 98, 11),
+    ("hangabubu_scared.png", 200, 200, 2),
+    ("hangabubu_scared.png", 200, 200, 2),
+    ("hangabubu_scared.png", 200, 200, 2),
+    ]
 
-# Hangman images
-images = []
-for i in range(7):
-    try:
-        image = pygame.image.load(f"hangman{i}.png")
-    except:
-        print(f"Missing image: hangman{i}.png")
-        image = pygame.Surface((800, 380))  # Placeholder
-    images.append(image)
+desired_width = 250
+desired_height = 250
+
+animations = []
+for path, fw, fh, steps in animation_data:
+    scale_x = desired_width / fw
+    scale_y = desired_height / fh
+    # if you want to preserve aspect ratio, use min(scale_x, scale_y)
+    scale = min(scale_x, scale_y)
+    
+    frames = create_sprite_animation(path, fw, fh, scale, steps)
+    animations.append(frames)
+
+# Animation control variables
+frame_indices = [0] * len(animations)  # current frame per animation
+animation_cooldown = 100  # ms between frames, adjust as needed
+last_update = pygame.time.get_ticks()
 
 letters = []
 RADIUS = 30
@@ -128,6 +144,7 @@ def draw_button(win, x, y, letter, is_hovered):
 
 # Draw everything
 def draw():
+    global last_update
     win.blit(background, (0, 0))
     title = TITLE_FONT.render(f"LEVEL {current_level}", 1, (40, 17, 7))
     win.blit(title, (WIDTH / 2 - title.get_width() / 2, 20))
@@ -156,9 +173,9 @@ def draw():
             is_hovered = dist < RADIUS
             draw_button(win, x, y, ltr, is_hovered)
 
+    if logo:
+        win.blit(logo, (350, 20))  # Adjust (x, y) position as needed
 
-    # Draw hangman
-    win.blit(images[hangman_status], (150, 100))
 
     if logo:
         win.blit(logo, (350, 20))  # Adjust (x, y) position as needed
@@ -187,6 +204,22 @@ def draw():
 
     menu_text = LETTER_FONT.render("Menu", True, (40, 17, 7))
     draw_centered_text(menu_text, menu_button_rect)
+
+    
+    # Update animation frame timing
+    current_time = pygame.time.get_ticks()
+    if current_time - last_update >= animation_cooldown:
+        # advance current animation frame
+        frame_indices[hangman_status] = (frame_indices[hangman_status] + 1) % len(animations[hangman_status])
+        last_update = current_time
+
+    # Draw current animation frame
+    current_frame = animations[hangman_status][frame_indices[hangman_status]]
+    
+    # Position the animation (adjust to your UI)
+    pos = (770, 270)
+
+    win.blit(current_frame, pos)
 
 
     pygame.display.update()
@@ -381,7 +414,6 @@ def main():
     # Reset letters
     for letter in letters:
         letter[3] = True
-
     clock = pygame.time.Clock()
     run = True
 
