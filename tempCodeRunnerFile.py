@@ -31,7 +31,7 @@ bubble_cooldown = 500  # ms between bubble frames
 
 # FontsC:\Users\bddel\Documents\GitHub\Hangabubu\main.py
 # font_path = r'C:\Users\DELL\Downloads\Hangabubu-main\LuckiestGuy-Regular.ttf'
-font_path = r'C:\Users\bddel\Documents\GitHub\Hangabubu\LuckiestGuy-Regular.ttf'
+font_path = r'\Users\bddel\OneDrive\ドキュメント\GitHub\Hangabubu\LuckiestGuy-Regular.ttf'
 #Kamo lay adjust ani guys hahahaha
 
 
