@@ -42,11 +42,11 @@ This was a project demonstration of data structures for CMSC 141 in UP Cebu, 202
 
 ## 👥 Project Contributors
 
-|------|--------|------|
-| Benedict John D. Dela Cruz | [@ChewyFishLegs](https://github.com/ChewyFishLegs) | Developer — Animations, Logic, and Gameplay|
-| veniboba | [@veniboo](https://github.com/veniboo) | Developer — Logo, Keyboard, and Layout|
-| — | [@IO-w-OI](https://github.com/IO-w-OI) | Developer — Logo, Background, and Keyboard |
-| Kyle Dominic Olmedo | [@domdom101904](https://github.com/domdom101904) | Sprite Artist — Brown Labubu sprites *(uncredited in repo)* |
+
+ Benedict John D. Dela Cruz | [@ChewyFishLegs](https://github.com/ChewyFishLegs) | Developer — Animations, Logic, and Gameplay|
+ Venice Trixel Caringal | [@veniboo](https://github.com/veniboo) | Developer — Logo, Keyboard, and Layout|
+ Isabel B. Ollaban | [@IO-w-OI](https://github.com/IO-w-OI) | Developer — Logo, Background, and Keyboard |
+ Kyle Dominic D. Olmedo | [@domdom101904](https://github.com/domdom101904) | Sprite Artist — Brown Labubu sprites *(uncredited in repo)* |
 
 ---
 
