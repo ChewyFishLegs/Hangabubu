@@ -23,7 +23,8 @@ GREEN = (0, 255, 0)
 BLACK = (0,0,0)
 # FontsC:\Users\bddel\Documents\GitHub\Hangabubu\main.py
 # font_path = r'C:\Users\DELL\Downloads\Hangabubu-main\LuckiestGuy-Regular.ttf'
-font_path = r'C:\Users\bddel\Documents\GitHub\Hangabubu\LuckiestGuy-Regular.ttf'
+# Final fix, allows Hangabubu to be run on any computer without worrying about font paths. Just make sure to place the 'LuckiestGuy-Regular.ttf' file in the same directory as this script.
+font_path = os.path.join(os.path.dirname(__file__), 'LuckiestGuy-Regular.ttf')
 #Kamo lay adjust ani guys hahahaha
 
 LETTER_FONT = pygame.font.Font(font_path, 40)
